@@ -1,0 +1,442 @@
+Identification Information: 
+  Citation: 
+    Citation Information: 
+      Originator: Energy Resources Conservation Board
+      Originator: Alberta Geological Survey
+      Originator: Moran, S.R.
+      Publication Date: 200811
+      Title: Surface materials of the Calgary urban area (GIS data, polygon features)
+      Geospatial Data Presentation Form: vector digital data
+      Series Information: 
+        Series Name: Digital Data
+        Issue Identification: DIG 2008-0874
+      Publication Information: 
+        Publication Place: Edmonton, Alberta, Canada
+        Publisher: Alberta Geological Survey
+      Online Linkage: http://www.ags.gov.ab.ca/publications/DIG/ZIP/DIG_2008_0874.zip
+  Description: 
+    Abstract: This is a GIS dataset containing digitized and attributed polygon features from scanned Alberta Geological Survey Maps 201, 202, 203 and 204. The data show the  surficial geology of the Calgary urban area (NTS areas 82O/01, 82P/04, 82J/16 and 82I/13) and are attributed with stratigraphic unit, lithology, lithogenesis, morphology, veneer material and the unit labels as shown on the maps. The data from the four maps are presented in a single polygon layer.
+    Purpose: For query and spatial analysis of the surficial geology of NTS areas 82O/01 and 82J/16 and the western halves of NTS  82P/04 and 82I/01.
+    Supplemental Information: Compilation of 4 NTS map area (Calgary  82O/01, Dalroy 82P/04, Priddis 82J/16, Dalemead 82I/13.)In English.
+  Time Period of Content: 
+    Time Period Information: 
+      Single Date/Time: 
+        Calendar Date: 1986
+    Currentness Reference: source - publication date
+  Status: 
+    Progress: Complete
+    Maintenance and Update Frequency: None planned
+  Spatial Domain: 
+    Bounding Coordinates: 
+      West Bounding Coordinate: -114.505972
+      East Bounding Coordinate: -113.737134
+      North Bounding Coordinate: 51.255304
+      South Bounding Coordinate: 50.744075
+  Keywords: 
+    Theme: 
+      Theme Keyword Thesaurus: none
+      Theme Keyword: geology
+      Theme Keyword: gis
+      Theme Keyword: glacial deposits
+      Theme Keyword: surficial geology
+    Place: 
+      Place Keyword Thesaurus: none
+      Place Keyword: 82i
+      Place Keyword: 82j
+      Place Keyword: 82o
+      Place Keyword: 82p
+      Place Keyword: alberta
+      Place Keyword: calgary
+      Place Keyword: canada
+      Place Keyword: dalemead
+      Place Keyword: dalroy
+      Place Keyword: priddis
+  Access Constraints: Public
+  Use Constraints: Acknowledgement of the Alberta Energy Regulator/Alberta Geological Survey as the originator/source of this information is required as described in the Open Government License - Alberta.
+  Point of Contact: 
+    Contact Information: 
+      Contact Organization Primary: 
+        Contact Organization: Alberta Geological Survey
+        Contact Person: Publications and Marketing Advisor
+      Contact Position: Publications and Marketing Advisor
+      Contact Address: 
+        Address Type: mailing and physical
+        Address: Alberta Energy Regulator
+        Address: 4th Floor, Twin Atria Building
+        Address: 4999-98 Avenue NW
+        City: Edmonton
+        State or Province: Alberta
+        Postal Code: T6B 2X3
+        Country: Canada
+      Contact Voice Telephone: (780) 422-1927
+      Contact Facsimile Telephone: (780) 422-1918
+      Contact Electronic Mail Address: AGS-Info@aer.ca
+      Hours of Service: 8:00 a.m. to 12:00 p.m. and 1:00 p.m. to 4:30 p.m.
+  Data Set Credit: GISmo Solutions prepared the preliminary linework. Data attribution, checking and corrections by R. Elgr and James Banting.
+  Native Data Set Environment: Microsoft Windows XP Version 5.1 (Build 2600) Service Pack 2; ESRI ArcCatalog 9.0.0.535
+  Cross Reference: 
+    Citation Information: 
+      Originator: Alberta Energy and Utilities Board
+      Originator: Alberta Geological Survey
+      Originator: Moran, S.
+      Publication Date: 1986
+      Title: Surficial Geology of the Calgary Urban Area
+      Geospatial Data Presentation Form: document
+      Series Information: 
+        Series Name: Bulletin
+        Issue Identification: BUL 053
+      Publication Information: 
+        Publication Place: Edmonton, Alberta, Canada
+        Publisher: Alberta Research Council-Terrain Sciences Department
+      Online Linkage: http://www.ags.gov.ab.ca/publications
+  Cross Reference: 
+    Citation Information: 
+      Originator: Alberta Energy and Utilities Board
+      Originator: Alberta Geological Survey
+      Originator: Moran, S.R.
+      Publication Date: 1986
+      Title: Surface materials of the Calgary urban area: Dalemead sheet, NTS 82I/13
+      Geospatial Data Presentation Form: map
+      Series Information: 
+        Series Name: Map
+        Issue Identification: MAP 201
+      Publication Information: 
+        Publication Place: Edmonton, Alberta, Canada
+        Publisher: Alberta Geological Survey
+      Other Citation Details: Scale 1:50000.
+      Online Linkage: http://www.ags.gov.ab.ca/publications
+  Cross Reference: 
+    Citation Information: 
+      Originator: Alberta Energy and Utilities Board
+      Originator: Alberta Geological Survey
+      Originator: Moran, S.R.
+      Publication Date: 1986
+      Title: Surface materials of the Calgary urban area: Dalroy sheet, NTS 82P/4
+      Geospatial Data Presentation Form: map
+      Series Information: 
+        Series Name: Map
+        Issue Identification: MAP 202
+      Publication Information: 
+        Publication Place: Edmonton, Alberta, Canada
+        Publisher: Alberta Geological Survey
+      Other Citation Details: Scale 1:50000.
+      Online Linkage: http://www.ags.gov.ab.ca/publications
+  Cross Reference: 
+    Citation Information: 
+      Originator: Alberta Energy and Utilities Board
+      Originator: Alberta Geological Survey
+      Originator: Moran, S.R.
+      Publication Date: 1986
+      Title: Surface materials of the Calgary urban area: Priddis sheet, NTS 82J/16
+      Geospatial Data Presentation Form: map
+      Series Information: 
+        Series Name: Map
+        Issue Identification: MAP 203
+      Publication Information: 
+        Publication Place: Edmonton, Alberta, Canada
+        Publisher: Alberta Geological Survey
+      Other Citation Details: Scale 1:50000.
+      Online Linkage: http://www.ags.gov.ab.ca/publications
+  Cross Reference: 
+    Citation Information: 
+      Originator: Alberta Energy and Utilities Board
+      Originator: Alberta Geological Survey
+      Originator: Moran, S.R.
+      Publication Date: 1986
+      Title: Surface materials of the Calgary urban area: Calgary sheet, NTS 82O/1
+      Geospatial Data Presentation Form: map
+      Series Information: 
+        Series Name: Map
+        Issue Identification: MAP 204
+      Publication Information: 
+        Publication Place: Edmonton, Alberta, Canada
+        Publisher: Alberta Geological Survey
+      Other Citation Details: Scale 1:50000.
+      Online Linkage: http://www.ags.gov.ab.ca/publications
+  Cross Reference: 
+    Citation Information: 
+      Originator: Energy Resources Conservation Board
+      Originator: Alberta Geological Survey
+      Originator: Moran, S.R.
+      Publication Date: 200811
+      Title: Surface materials of the Calgary urban area - linear landforms (GIS data, line features)
+      Geospatial Data Presentation Form: vector digital data
+      Series Information: 
+        Series Name: Digital Data
+        Issue Identification: DIG 2008-0873
+      Publication Information: 
+        Publication Place: Edmonton, Alberta, Canada
+        Publisher: Alberta Geological Survey
+      Online Linkage: http://www.ags.gov.ab.ca/publications
+  Cross Reference: 
+    Citation Information: 
+      Originator: Energy Resources Conservation Board
+      Originator: Alberta Geological Survey
+      Originator: Moran, S.R.
+      Publication Date: 200811
+      Title: Surface materials of the Calgary urban area - veneer material (GIS data, polygon overlay features)
+      Geospatial Data Presentation Form: vector digital data
+      Series Information: 
+        Series Name: Digital Data
+        Issue Identification: DIG 2008-0875
+      Publication Information: 
+        Publication Place: Edmonton, Alberta, Canada
+        Publisher: Alberta Geological Survey
+      Online Linkage: http://www.ags.gov.ab.ca/publications
+  Cross Reference: 
+    Citation Information: 
+      Originator: Energy Resources Conservation Board
+      Originator: Alberta Geological Survey
+      Originator: Moran, S.R.
+      Publication Date: 200811
+      Title: Surface materials of the Calgary urban area - geological contacts (GIS data, line features)
+      Geospatial Data Presentation Form: vector digital data
+      Series Information: 
+        Series Name: Digital Data
+        Issue Identification: DIG 2008-0876
+      Publication Information: 
+        Publication Place: Edmonton, Alberta, Canada
+        Publisher: Alberta Geological Survey
+      Online Linkage: http://www.ags.gov.ab.ca/publications
+Data Quality Information: 
+  Attribute Accuracy: 
+    Attribute Accuracy Report: L1_LABEL attribute: 5% of the values in this field were checked by examining every 20th record in the attribute table, then comparing values to the source map. Of this subset, less than 2% were found in error, and those errors were corrected. Code 'PS-' as shown on the scan of original paper map was changed to '-PS' based on coding in the map legend. In two instances, code '-PF' as shown on the scan was changed to 'PF' based on coding in the map legend. Other minor discrepancies in the map were adjusted in the dataset under the direction of an Alberta Geological Survey surficial geologist. In addition, unique listings of the domain values for all text fields were generated, then proofread and corrected.
+  Logical Consistency Report: The data represents a contiguous set of polygons for the mapped area. As this map is strictly a data conversion of a paper source map, no effort was made to ensure continuity of features with existing surficial data in adjacent study areas (i.e., edgematching).
+  Completeness Report: The source maps cover all of map areas 82O/01and 82J/16, but only the western halves of 82P/04 and 82I/13, as that is the only part mapped in the latter 2 areas.
+  Positional Accuracy: 
+    Horizontal Positional Accuracy: 
+      Horizontal Positional Accuracy Report: Horizontal accuracy varies between ±40 and ±60 m, depending on the area. This estimate is based on comparison with provincial 20,000-scale hydrography data.
+  Lineage: 
+    Source Information: 
+      Source Citation: 
+        Citation Information: 
+          Originator: Alberta Energy and Utilities Board
+          Originator: Alberta Geological Survey
+          Originator: Moran, S.R.
+          Publication Date: 1986
+          Title: Surface materials of the Calgary urban area: Dalemead sheet, NTS 82I/13
+          Geospatial Data Presentation Form: map
+          Series Information: 
+            Series Name: Map
+            Issue Identification: MAP 201
+          Publication Information: 
+            Publication Place: Edmonton, Alberta, Canada
+            Publisher: Alberta Geological Survey
+          Other Citation Details: Scale 1:50000.
+      Source Scale Denominator: 50000
+      Type of Source Media: paper
+      Source Time Period of Content: 
+        Time Period Information: 
+          Single Date/Time: 
+            Calendar Date: 1986
+        Source Currentness Reference: publication date
+      Source Citation Abbreviation: AGS Map 201
+      Source Contribution: surficial materials data
+    Source Information: 
+      Source Citation: 
+        Citation Information: 
+          Originator: Alberta Energy and Utilities Board
+          Originator: Alberta Geological Survey
+          Originator: Moran, S.R.
+          Publication Date: 1986
+          Title: Surface materials of the Calgary urban area: Dalroy sheet, NTS 82P/4
+          Geospatial Data Presentation Form: map
+          Series Information: 
+            Series Name: Map
+            Issue Identification: MAP 202
+          Publication Information: 
+            Publication Place: Edmonton, Alberta, Canada
+            Publisher: Alberta Geological Survey
+          Other Citation Details: Scale 1:50000.
+      Source Scale Denominator: 50000
+      Type of Source Media: paper
+      Source Time Period of Content: 
+        Time Period Information: 
+          Single Date/Time: 
+            Calendar Date: 1986
+        Source Currentness Reference: publication date
+      Source Citation Abbreviation: AGS Map 202
+      Source Contribution: surficial materials data
+    Source Information: 
+      Source Citation: 
+        Citation Information: 
+          Originator: Alberta Energy and Utilities Board
+          Originator: Alberta Geological Survey
+          Originator: Moran, S.R.
+          Publication Date: 1986
+          Title: Surface materials of the Calgary urban area: Priddis sheet, NTS 82J/16
+          Geospatial Data Presentation Form: map
+          Series Information: 
+            Series Name: Map
+            Issue Identification: MAP 203
+          Publication Information: 
+            Publication Place: Edmonton, Alberta, Canada
+            Publisher: Alberta Geological Survey
+          Other Citation Details: Scale 1:50000.
+      Source Scale Denominator: 50000
+      Type of Source Media: paper
+      Source Time Period of Content: 
+        Time Period Information: 
+          Single Date/Time: 
+            Calendar Date: 1986
+        Source Currentness Reference: publication date
+      Source Citation Abbreviation: AGS Map 203
+      Source Contribution: surficial materials data
+    Source Information: 
+      Source Citation: 
+        Citation Information: 
+          Originator: Alberta Energy and Utilities Board
+          Originator: Alberta Geological Survey
+          Originator: Moran, S.R.
+          Publication Date: 1986
+          Title: Surface materials of the Calgary urban area: Calgary sheet, NTS 82O/1
+          Geospatial Data Presentation Form: map
+          Series Information: 
+            Series Name: Map
+            Issue Identification: MAP 204
+          Publication Information: 
+            Publication Place: Edmonton, Alberta, Canada
+            Publisher: Alberta Geological Survey
+          Other Citation Details: Scale 1:50000.
+      Source Scale Denominator: 50000
+      Type of Source Media: paper
+      Source Time Period of Content: 
+        Time Period Information: 
+          Single Date/Time: 
+            Calendar Date: 1986
+        Source Currentness Reference: publication date
+      Source Citation Abbreviation: AGS Map 204
+      Source Contribution: surficial materials data
+    Process Step: 
+      Process Description: Mylar versions of AGS Maps 201, 202, 203 and 204 were scanned at 300 dpi. GISmo Solutions Ltd. georeferenced the images and digitized the linework into an ESRI geodatabase. Polygons were coded with an integer linking to each type of surficial polygon in the 4 maps' legends.
+      Process Date: 2008
+    Process Step: 
+      Process Description: AGS compiled legend information into Excel. Attributes were joined to the polygon data and extensive checking was done to ensure accuracy.
+      Process Date: 2008
+Spatial Data Organization Information: 
+  Direct Spatial Reference Method: Vector
+  Point and Vector Object Information: 
+    SDTS Terms Description: 
+      SDTS Point and Vector Object Type: G-polygon
+      Point and Vector Object Count: 3280
+Spatial Reference Information: 
+  Horizontal Coordinate System Definition: 
+    Planar: 
+      Planar Coordinate Information: 
+        Planar Coordinate Encoding Method: coordinate pair
+        Planar Distance Units: metres
+        Coordinate Representation: 
+          Abscissa Resolution: 0.000000
+          Ordinate Resolution: 0.000000
+      Map Projection: 
+        Map Projection Name: Transverse Mercator
+        Transverse Mercator: 
+          Scale Factor at Central Meridian: 0.999200
+          Longitude of Central Meridian: -115.000000
+          Latitude of Projection Origin: 0.000000
+          False Easting: 500000.000000
+          False Northing: 0.000000
+    Geodetic Model: 
+      Horizontal Datum Name: North American Datum of 1983
+      Ellipsoid Name: Geodetic Reference System 80
+      Semi-Major Axis: 6378137.000000
+      Denominator of Flattening Ratio: 298.257222
+Entity and Attribute Information: 
+  Detailed Description: 
+    Entity Type: 
+      Entity Type Label: surf_py_ll.dbf
+    Attribute: 
+      Attribute Label: STRAT_UNIT
+      Attribute Definition: Stratigraphic Unit
+      Attribute Definition Source: Surface Materials of the Calgary Urban Area map legend.
+    Attribute: 
+      Attribute Label: MATERIAL
+      Attribute Definition: Lithology (material)
+      Attribute Definition Source: Surface Materials of the Calgary Urban Area map legend.
+    Attribute: 
+      Attribute Label: GENESIS
+      Attribute Definition: Lithogenesis (origin of material)
+      Attribute Definition Source: Surface Materials of the Calgary Urban Area map legend.
+    Attribute: 
+      Attribute Label: MORPHOLOGY
+      Attribute Definition: Morphology (descriptive and/or genetic)
+      Attribute Definition Source: Surface Materials of the Calgary Urban Area map legend.
+    Attribute: 
+      Attribute Label: COMMENT
+      Attribute Definition: Comment
+      Attribute Definition Source: Surface Materials of the Calgary Urban Area map legend.
+    Attribute: 
+      Attribute Label: L1_LABEL
+      Attribute Definition: Level 1 label (top level part of multilevel label or whole label if not multilevel one)
+      Attribute Definition Source: Surface Materials of the Calgary Urban Area map legend.
+    Attribute: 
+      Attribute Label: L2_LABEL
+      Attribute Definition: Level 2 label (2nd level text of multilevel labels)
+      Attribute Definition Source: Surface Materials of the Calgary Urban Area map legend.
+    Attribute: 
+      Attribute Label: L3_LABEL
+      Attribute Definition: Level 3 label (3rd level text of multilevel labels)
+      Attribute Definition Source: Surface Materials of the Calgary Urban Area map legend.
+    Attribute: 
+      Attribute Label: L4_LABEL
+      Attribute Definition: Level 4 label (4th level text of multilevel labels)
+      Attribute Definition Source: Surface Materials of the Calgary Urban Area map legend.
+    Attribute: 
+      Attribute Label: S_LABEL
+      Attribute Definition: Side label (text on the right side of multilevel labels if exists)
+      Attribute Definition Source: Surface Materials of the Calgary Urban Area map legend.
+    Attribute: 
+      Attribute Label: VENEERMAT
+      Attribute Definition: Veneer material (silt and clay, till, gravel, silt, sand and silt)
+      Attribute Definition Source: Surface Materials of the Calgary Urban Area map legend.
+    Attribute: 
+      Attribute Label: R_G_B
+      Attribute Definition: RGB (Red-Green-Blue) values of polygon colour as on the original paper map.
+      Attribute Definition Source: Alberta Geological Survey
+Distribution Information: 
+  Distributor: 
+    Contact Information: 
+      Contact Organization Primary: 
+        Contact Organization: Alberta Geological Survey
+        Contact Person: Publications and Marketing Advisor
+      Contact Position: Publications and Marketing Advisor
+      Contact Address: 
+        Address Type: mailing and physical
+        Address: Alberta Energy Regulator
+        Address: 4th Floor, Twin Atria Building
+        Address: 4999-98 Avenue NW
+        City: Edmonton
+        State or Province: Alberta
+        Postal Code: T6B 2X3
+        Country: Canada
+      Contact Voice Telephone: (780) 422-1927
+      Contact Facsimile Telephone: (780) 422-1918
+      Contact Electronic Mail Address: AGS-Info@aer.ca
+      Hours of Service: 8:00 a.m. to 12:00 p.m. and 1:00 p.m. to 4:30 p.m.
+  Distribution Liability: The Alberta Energy Regulator/Alberta Geological Survey (AER/AGS) licenses this information under the Open Government License - Alberta. Any references to proprietary software in our documentation, and/or any use of proprietary data formats in our releases, do not constitute endorsement by the AER/AGS of any manufacturer's product.
+Metadata Reference Information: 
+  Metadata Date: 20131107
+  Metadata Contact: 
+    Contact Information: 
+      Contact Organization Primary: 
+        Contact Organization: Alberta Geological Survey
+        Contact Person: Publications and Marketing Advisor
+      Contact Position: Publications and Marketing Advisor
+      Contact Address: 
+        Address Type: mailing and physical
+        Address: Alberta Energy Regulator
+        Address: 4th Floor, Twin Atria Building
+        Address: 4999-98 Avenue NW
+        City: Edmonton
+        State or Province: Alberta
+        Postal Code: T6B 2X3
+        Country: Canada
+      Contact Voice Telephone: (780) 422-1927
+      Contact Facsimile Telephone: (780) 422-1918
+      Contact Electronic Mail Address: AGS-Info@aer.ca
+      Hours of Service: 8:00 a.m. to 12:00 p.m. and 1:00 p.m. to 4:30 p.m.
+  Metadata Standard Name: FGDC Content Standard for Digital Geospatial Metadata
+  Metadata Standard Version: FGDC-STD-001-1998
+  Metadata Time Convention: local time
+  Metadata Access Constraints: none
+  Metadata Use Constraints: none

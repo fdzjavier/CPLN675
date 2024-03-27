@@ -1,0 +1,575 @@
+<?xml version="1.0"?>
+<metadata>
+<idinfo>
+  <citation>
+    <citeinfo>
+      <origin>Energy Resources Conservation Board</origin>
+      <origin>Alberta Geological Survey</origin>
+      <origin>Moran, S.R.</origin>
+      <pubdate>200811</pubdate>
+      <title>Surface materials of the Calgary urban area (GIS data, polygon features)</title>
+      <geoform>vector digital data</geoform>
+      <serinfo>
+        <sername>Digital Data</sername>
+        <issue>DIG 2008-0874</issue>
+      </serinfo>
+      <pubinfo>
+        <pubplace>Edmonton, Alberta, Canada</pubplace>
+        <publish>Alberta Geological Survey</publish>
+      </pubinfo>
+      <onlink>http://www.ags.gov.ab.ca/publications/DIG/ZIP/DIG_2008_0874.zip</onlink>
+    </citeinfo>
+  </citation>
+  <descript>
+    <abstract>This is a GIS dataset containing digitized and attributed polygon features from scanned Alberta Geological Survey Maps 201, 202, 203 and 204. The data show the  surficial geology of the Calgary urban area (NTS areas 82O/01, 82P/04, 82J/16 and 82I/13) and are attributed with stratigraphic unit, lithology, lithogenesis, morphology, veneer material and the unit labels as shown on the maps. The data from the four maps are presented in a single polygon layer.</abstract>
+    <purpose>For query and spatial analysis of the surficial geology of NTS areas 82O/01 and 82J/16 and the western halves of NTS  82P/04 and 82I/01.</purpose>
+    <supplinf>Compilation of 4 NTS map area (Calgary  82O/01, Dalroy 82P/04, Priddis 82J/16, Dalemead 82I/13.)In English.</supplinf>
+  </descript>
+  <timeperd>
+    <timeinfo>
+      <sngdate>
+        <caldate>1986</caldate>
+      </sngdate>
+    </timeinfo>
+    <current>source - publication date</current>
+  </timeperd>
+  <status>
+    <progress>Complete</progress>
+    <update>None planned</update>
+  </status>
+  <spdom>
+    <bounding>
+      <westbc>-114.505972</westbc>
+      <eastbc>-113.737134</eastbc>
+      <northbc>51.255304</northbc>
+      <southbc>50.744075</southbc>
+    </bounding>
+  </spdom>
+  <keywords>
+    <theme>
+      <themekt>none</themekt>
+      <themekey>geology</themekey>
+      <themekey>gis</themekey>
+      <themekey>glacial deposits</themekey>
+      <themekey>surficial geology</themekey>
+    </theme>
+    <theme>
+      <themekt>ISO 19115 Topic Category</themekt>
+      <themekey>geoscientificInformation</themekey>
+    </theme>
+    <place>
+      <placekt>none</placekt>
+      <placekey>82i</placekey>
+      <placekey>82j</placekey>
+      <placekey>82o</placekey>
+      <placekey>82p</placekey>
+      <placekey>alberta</placekey>
+      <placekey>calgary</placekey>
+      <placekey>canada</placekey>
+      <placekey>dalemead</placekey>
+      <placekey>dalroy</placekey>
+      <placekey>priddis</placekey>
+    </place>
+  </keywords>
+  <accconst>Public</accconst>
+  <useconst>Acknowledgement of the Alberta Energy Regulator/Alberta Geological Survey as the originator/source of this information is required as described in the Open Government License - Alberta.</useconst>
+  <ptcontac>
+    <cntinfo>
+      <cntorgp>
+        <cntorg>Alberta Geological Survey</cntorg>
+        <cntper>Publications and Marketing Advisor</cntper>
+      </cntorgp>
+      <cntpos>Publications and Marketing Advisor</cntpos>
+      <cntaddr>
+        <addrtype>mailing and physical</addrtype>
+        <address>Alberta Energy Regulator</address>
+        <address>4th Floor, Twin Atria Building</address>
+        <address>4999-98 Avenue NW</address>
+        <city>Edmonton</city>
+        <state>Alberta</state>
+        <postal>T6B 2X3</postal>
+        <country>Canada</country>
+      </cntaddr>
+      <cntvoice>(780) 422-1927</cntvoice>
+      <cntfax>(780) 422-1918</cntfax>
+      <cntemail>AGS-Info@aer.ca</cntemail>
+      <hours>8:00 a.m. to 12:00 p.m. and 1:00 p.m. to 4:30 p.m.</hours>
+    </cntinfo>
+  </ptcontac>
+  <datacred>GISmo Solutions prepared the preliminary linework. Data attribution, checking and corrections by R. Elgr and James Banting.</datacred>
+  <native>Microsoft Windows XP Version 5.1 (Build 2600) Service Pack 2; ESRI ArcCatalog 9.0.0.535</native>
+  <crossref>
+    <citeinfo>
+      <origin>Alberta Energy and Utilities Board</origin>
+      <origin>Alberta Geological Survey</origin>
+      <origin>Moran, S.</origin>
+      <pubdate>1986</pubdate>
+      <title>Surficial Geology of the Calgary Urban Area</title>
+      <geoform>document</geoform>
+      <serinfo>
+        <sername>Bulletin</sername>
+        <issue>BUL 053</issue>
+      </serinfo>
+      <pubinfo>
+        <pubplace>Edmonton, Alberta, Canada</pubplace>
+        <publish>Alberta Research Council-Terrain Sciences Department</publish>
+      </pubinfo>
+      <onlink>http://www.ags.gov.ab.ca/publications</onlink>
+    </citeinfo>
+  </crossref>
+  <crossref>
+    <citeinfo>
+      <origin>Alberta Energy and Utilities Board</origin>
+      <origin>Alberta Geological Survey</origin>
+      <origin>Moran, S.R.</origin>
+      <pubdate>1986</pubdate>
+      <title>Surface materials of the Calgary urban area: Dalemead sheet, NTS 82I/13</title>
+      <geoform>map</geoform>
+      <serinfo>
+        <sername>Map</sername>
+        <issue>MAP 201</issue>
+      </serinfo>
+      <pubinfo>
+        <pubplace>Edmonton, Alberta, Canada</pubplace>
+        <publish>Alberta Geological Survey</publish>
+      </pubinfo>
+      <othercit>Scale 1:50000.</othercit>
+      <onlink>http://www.ags.gov.ab.ca/publications</onlink>
+    </citeinfo>
+  </crossref>
+  <crossref>
+    <citeinfo>
+      <origin>Alberta Energy and Utilities Board</origin>
+      <origin>Alberta Geological Survey</origin>
+      <origin>Moran, S.R.</origin>
+      <pubdate>1986</pubdate>
+      <title>Surface materials of the Calgary urban area: Dalroy sheet, NTS 82P/4</title>
+      <geoform>map</geoform>
+      <serinfo>
+        <sername>Map</sername>
+        <issue>MAP 202</issue>
+      </serinfo>
+      <pubinfo>
+        <pubplace>Edmonton, Alberta, Canada</pubplace>
+        <publish>Alberta Geological Survey</publish>
+      </pubinfo>
+      <othercit>Scale 1:50000.</othercit>
+      <onlink>http://www.ags.gov.ab.ca/publications</onlink>
+    </citeinfo>
+  </crossref>
+  <crossref>
+    <citeinfo>
+      <origin>Alberta Energy and Utilities Board</origin>
+      <origin>Alberta Geological Survey</origin>
+      <origin>Moran, S.R.</origin>
+      <pubdate>1986</pubdate>
+      <title>Surface materials of the Calgary urban area: Priddis sheet, NTS 82J/16</title>
+      <geoform>map</geoform>
+      <serinfo>
+        <sername>Map</sername>
+        <issue>MAP 203</issue>
+      </serinfo>
+      <pubinfo>
+        <pubplace>Edmonton, Alberta, Canada</pubplace>
+        <publish>Alberta Geological Survey</publish>
+      </pubinfo>
+      <othercit>Scale 1:50000.</othercit>
+      <onlink>http://www.ags.gov.ab.ca/publications</onlink>
+    </citeinfo>
+  </crossref>
+  <crossref>
+    <citeinfo>
+      <origin>Alberta Energy and Utilities Board</origin>
+      <origin>Alberta Geological Survey</origin>
+      <origin>Moran, S.R.</origin>
+      <pubdate>1986</pubdate>
+      <title>Surface materials of the Calgary urban area: Calgary sheet, NTS 82O/1</title>
+      <geoform>map</geoform>
+      <serinfo>
+        <sername>Map</sername>
+        <issue>MAP 204</issue>
+      </serinfo>
+      <pubinfo>
+        <pubplace>Edmonton, Alberta, Canada</pubplace>
+        <publish>Alberta Geological Survey</publish>
+      </pubinfo>
+      <othercit>Scale 1:50000.</othercit>
+      <onlink>http://www.ags.gov.ab.ca/publications</onlink>
+    </citeinfo>
+  </crossref>
+  <crossref>
+    <citeinfo>
+      <origin>Energy Resources Conservation Board</origin>
+      <origin>Alberta Geological Survey</origin>
+      <origin>Moran, S.R.</origin>
+      <pubdate>200811</pubdate>
+      <title>Surface materials of the Calgary urban area - linear landforms (GIS data, line features)</title>
+      <geoform>vector digital data</geoform>
+      <serinfo>
+        <sername>Digital Data</sername>
+        <issue>DIG 2008-0873</issue>
+      </serinfo>
+      <pubinfo>
+        <pubplace>Edmonton, Alberta, Canada</pubplace>
+        <publish>Alberta Geological Survey</publish>
+      </pubinfo>
+      <onlink>http://www.ags.gov.ab.ca/publications</onlink>
+    </citeinfo>
+  </crossref>
+  <crossref>
+    <citeinfo>
+      <origin>Energy Resources Conservation Board</origin>
+      <origin>Alberta Geological Survey</origin>
+      <origin>Moran, S.R.</origin>
+      <pubdate>200811</pubdate>
+      <title>Surface materials of the Calgary urban area - veneer material (GIS data, polygon overlay features)</title>
+      <geoform>vector digital data</geoform>
+      <serinfo>
+        <sername>Digital Data</sername>
+        <issue>DIG 2008-0875</issue>
+      </serinfo>
+      <pubinfo>
+        <pubplace>Edmonton, Alberta, Canada</pubplace>
+        <publish>Alberta Geological Survey</publish>
+      </pubinfo>
+      <onlink>http://www.ags.gov.ab.ca/publications</onlink>
+    </citeinfo>
+  </crossref>
+  <crossref>
+    <citeinfo>
+      <origin>Energy Resources Conservation Board</origin>
+      <origin>Alberta Geological Survey</origin>
+      <origin>Moran, S.R.</origin>
+      <pubdate>200811</pubdate>
+      <title>Surface materials of the Calgary urban area - geological contacts (GIS data, line features)</title>
+      <geoform>vector digital data</geoform>
+      <serinfo>
+        <sername>Digital Data</sername>
+        <issue>DIG 2008-0876</issue>
+      </serinfo>
+      <pubinfo>
+        <pubplace>Edmonton, Alberta, Canada</pubplace>
+        <publish>Alberta Geological Survey</publish>
+      </pubinfo>
+      <onlink>http://www.ags.gov.ab.ca/publications</onlink>
+    </citeinfo>
+  </crossref>
+</idinfo>
+<dataqual>
+  <attracc>
+    <attraccr>L1_LABEL attribute: 5% of the values in this field were checked by examining every 20th record in the attribute table, then comparing values to the source map. Of this subset, less than 2% were found in error, and those errors were corrected. Code &apos;PS-&apos; as shown on the scan of original paper map was changed to &apos;-PS&apos; based on coding in the map legend. In two instances, code &apos;-PF&apos; as shown on the scan was changed to &apos;PF&apos; based on coding in the map legend. Other minor discrepancies in the map were adjusted in the dataset under the direction of an Alberta Geological Survey surficial geologist. In addition, unique listings of the domain values for all text fields were generated, then proofread and corrected.</attraccr>
+  </attracc>
+  <logic>The data represents a contiguous set of polygons for the mapped area. As this map is strictly a data conversion of a paper source map, no effort was made to ensure continuity of features with existing surficial data in adjacent study areas (i.e., edgematching).</logic>
+  <complete>The source maps cover all of map areas 82O/01and 82J/16, but only the western halves of 82P/04 and 82I/13, as that is the only part mapped in the latter 2 areas.</complete>
+  <posacc>
+    <horizpa>
+      <horizpar>Horizontal accuracy varies between ±40 and ±60 m, depending on the area. This estimate is based on comparison with provincial 20,000-scale hydrography data.</horizpar>
+    </horizpa>
+  </posacc>
+  <lineage>
+    <srcinfo>
+      <srccite>
+        <citeinfo>
+          <origin>Alberta Energy and Utilities Board</origin>
+          <origin>Alberta Geological Survey</origin>
+          <origin>Moran, S.R.</origin>
+          <pubdate>1986</pubdate>
+          <title>Surface materials of the Calgary urban area: Dalemead sheet, NTS 82I/13</title>
+          <geoform>map</geoform>
+          <serinfo>
+            <sername>Map</sername>
+            <issue>MAP 201</issue>
+          </serinfo>
+          <pubinfo>
+            <pubplace>Edmonton, Alberta, Canada</pubplace>
+            <publish>Alberta Geological Survey</publish>
+          </pubinfo>
+          <othercit>Scale 1:50000.</othercit>
+        </citeinfo>
+      </srccite>
+      <srcscale>50000</srcscale>
+      <typesrc>paper</typesrc>
+      <srctime>
+        <timeinfo>
+          <sngdate>
+            <caldate>1986</caldate>
+          </sngdate>
+        </timeinfo>
+        <srccurr>publication date</srccurr>
+      </srctime>
+      <srccitea>AGS Map 201</srccitea>
+      <srccontr>surficial materials data</srccontr>
+    </srcinfo>
+    <srcinfo>
+      <srccite>
+        <citeinfo>
+          <origin>Alberta Energy and Utilities Board</origin>
+          <origin>Alberta Geological Survey</origin>
+          <origin>Moran, S.R.</origin>
+          <pubdate>1986</pubdate>
+          <title>Surface materials of the Calgary urban area: Dalroy sheet, NTS 82P/4</title>
+          <geoform>map</geoform>
+          <serinfo>
+            <sername>Map</sername>
+            <issue>MAP 202</issue>
+          </serinfo>
+          <pubinfo>
+            <pubplace>Edmonton, Alberta, Canada</pubplace>
+            <publish>Alberta Geological Survey</publish>
+          </pubinfo>
+          <othercit>Scale 1:50000.</othercit>
+        </citeinfo>
+      </srccite>
+      <srcscale>50000</srcscale>
+      <typesrc>paper</typesrc>
+      <srctime>
+        <timeinfo>
+          <sngdate>
+            <caldate>1986</caldate>
+          </sngdate>
+        </timeinfo>
+        <srccurr>publication date</srccurr>
+      </srctime>
+      <srccitea>AGS Map 202</srccitea>
+      <srccontr>surficial materials data</srccontr>
+    </srcinfo>
+    <srcinfo>
+      <srccite>
+        <citeinfo>
+          <origin>Alberta Energy and Utilities Board</origin>
+          <origin>Alberta Geological Survey</origin>
+          <origin>Moran, S.R.</origin>
+          <pubdate>1986</pubdate>
+          <title>Surface materials of the Calgary urban area: Priddis sheet, NTS 82J/16</title>
+          <geoform>map</geoform>
+          <serinfo>
+            <sername>Map</sername>
+            <issue>MAP 203</issue>
+          </serinfo>
+          <pubinfo>
+            <pubplace>Edmonton, Alberta, Canada</pubplace>
+            <publish>Alberta Geological Survey</publish>
+          </pubinfo>
+          <othercit>Scale 1:50000.</othercit>
+        </citeinfo>
+      </srccite>
+      <srcscale>50000</srcscale>
+      <typesrc>paper</typesrc>
+      <srctime>
+        <timeinfo>
+          <sngdate>
+            <caldate>1986</caldate>
+          </sngdate>
+        </timeinfo>
+        <srccurr>publication date</srccurr>
+      </srctime>
+      <srccitea>AGS Map 203</srccitea>
+      <srccontr>surficial materials data</srccontr>
+    </srcinfo>
+    <srcinfo>
+      <srccite>
+        <citeinfo>
+          <origin>Alberta Energy and Utilities Board</origin>
+          <origin>Alberta Geological Survey</origin>
+          <origin>Moran, S.R.</origin>
+          <pubdate>1986</pubdate>
+          <title>Surface materials of the Calgary urban area: Calgary sheet, NTS 82O/1</title>
+          <geoform>map</geoform>
+          <serinfo>
+            <sername>Map</sername>
+            <issue>MAP 204</issue>
+          </serinfo>
+          <pubinfo>
+            <pubplace>Edmonton, Alberta, Canada</pubplace>
+            <publish>Alberta Geological Survey</publish>
+          </pubinfo>
+          <othercit>Scale 1:50000.</othercit>
+        </citeinfo>
+      </srccite>
+      <srcscale>50000</srcscale>
+      <typesrc>paper</typesrc>
+      <srctime>
+        <timeinfo>
+          <sngdate>
+            <caldate>1986</caldate>
+          </sngdate>
+        </timeinfo>
+        <srccurr>publication date</srccurr>
+      </srctime>
+      <srccitea>AGS Map 204</srccitea>
+      <srccontr>surficial materials data</srccontr>
+    </srcinfo>
+    <procstep>
+      <procdesc>Mylar versions of AGS Maps 201, 202, 203 and 204 were scanned at 300 dpi. GISmo Solutions Ltd. georeferenced the images and digitized the linework into an ESRI geodatabase. Polygons were coded with an integer linking to each type of surficial polygon in the 4 maps&apos; legends.</procdesc>
+      <procdate>2008</procdate>
+    </procstep>
+    <procstep>
+      <procdesc>AGS compiled legend information into Excel. Attributes were joined to the polygon data and extensive checking was done to ensure accuracy.</procdesc>
+      <procdate>2008</procdate>
+    </procstep>
+  </lineage>
+</dataqual>
+<spdoinfo>
+  <direct>Vector</direct>
+  <ptvctinf>
+    <sdtsterm>
+      <sdtstype>G-polygon</sdtstype>
+      <ptvctcnt>3280</ptvctcnt>
+    </sdtsterm>
+  </ptvctinf>
+</spdoinfo>
+<spref>
+  <horizsys>
+    <planar>
+      <planci>
+        <plance>coordinate pair</plance>
+        <plandu>metres</plandu>
+        <coordrep>
+          <absres>0.000000</absres>
+          <ordres>0.000000</ordres>
+        </coordrep>
+      </planci>
+      <mapproj>
+        <mapprojn>Transverse Mercator</mapprojn>
+        <transmer>
+          <sfctrmer>0.999200</sfctrmer>
+          <longcm>-115.000000</longcm>
+          <latprjo>0.000000</latprjo>
+          <feast>500000.000000</feast>
+          <fnorth>0.000000</fnorth>
+        </transmer>
+      </mapproj>
+    </planar>
+    <geodetic>
+      <horizdn>North American Datum of 1983</horizdn>
+      <ellips>Geodetic Reference System 80</ellips>
+      <semiaxis>6378137.000000</semiaxis>
+      <denflat>298.257222</denflat>
+    </geodetic>
+  </horizsys>
+</spref>
+<eainfo>
+  <detailed>
+    <enttyp>
+      <enttypl>surf_py_ll.dbf</enttypl>
+    </enttyp>
+    <attr>
+      <attrlabl>STRAT_UNIT</attrlabl>
+      <attrdef>Stratigraphic Unit</attrdef>
+      <attrdefs>Surface Materials of the Calgary Urban Area map legend.</attrdefs>
+    </attr>
+    <attr>
+      <attrlabl>MATERIAL</attrlabl>
+      <attrdef>Lithology (material)</attrdef>
+      <attrdefs>Surface Materials of the Calgary Urban Area map legend.</attrdefs>
+    </attr>
+    <attr>
+      <attrlabl>GENESIS</attrlabl>
+      <attrdef>Lithogenesis (origin of material)</attrdef>
+      <attrdefs>Surface Materials of the Calgary Urban Area map legend.</attrdefs>
+    </attr>
+    <attr>
+      <attrlabl>MORPHOLOGY</attrlabl>
+      <attrdef>Morphology (descriptive and/or genetic)</attrdef>
+      <attrdefs>Surface Materials of the Calgary Urban Area map legend.</attrdefs>
+    </attr>
+    <attr>
+      <attrlabl>COMMENT</attrlabl>
+      <attrdef>Comment</attrdef>
+      <attrdefs>Surface Materials of the Calgary Urban Area map legend.</attrdefs>
+    </attr>
+    <attr>
+      <attrlabl>L1_LABEL</attrlabl>
+      <attrdef>Level 1 label (top level part of multilevel label or whole label if not multilevel one)</attrdef>
+      <attrdefs>Surface Materials of the Calgary Urban Area map legend.</attrdefs>
+    </attr>
+    <attr>
+      <attrlabl>L2_LABEL</attrlabl>
+      <attrdef>Level 2 label (2nd level text of multilevel labels)</attrdef>
+      <attrdefs>Surface Materials of the Calgary Urban Area map legend.</attrdefs>
+    </attr>
+    <attr>
+      <attrlabl>L3_LABEL</attrlabl>
+      <attrdef>Level 3 label (3rd level text of multilevel labels)</attrdef>
+      <attrdefs>Surface Materials of the Calgary Urban Area map legend.</attrdefs>
+    </attr>
+    <attr>
+      <attrlabl>L4_LABEL</attrlabl>
+      <attrdef>Level 4 label (4th level text of multilevel labels)</attrdef>
+      <attrdefs>Surface Materials of the Calgary Urban Area map legend.</attrdefs>
+    </attr>
+    <attr>
+      <attrlabl>S_LABEL</attrlabl>
+      <attrdef>Side label (text on the right side of multilevel labels if exists)</attrdef>
+      <attrdefs>Surface Materials of the Calgary Urban Area map legend.</attrdefs>
+    </attr>
+    <attr>
+      <attrlabl>VENEERMAT</attrlabl>
+      <attrdef>Veneer material (silt and clay, till, gravel, silt, sand and silt)</attrdef>
+      <attrdefs>Surface Materials of the Calgary Urban Area map legend.</attrdefs>
+    </attr>
+    <attr>
+      <attrlabl>R_G_B</attrlabl>
+      <attrdef>RGB (Red-Green-Blue) values of polygon colour as on the original paper map.</attrdef>
+      <attrdefs>Alberta Geological Survey</attrdefs>
+    </attr>
+  </detailed>
+</eainfo>
+<distinfo>
+  <distrib>
+    <cntinfo>
+      <cntorgp>
+        <cntorg>Alberta Geological Survey</cntorg>
+        <cntper>Publications and Marketing Advisor</cntper>
+      </cntorgp>
+      <cntpos>Publications and Marketing Advisor</cntpos>
+      <cntaddr>
+        <addrtype>mailing and physical</addrtype>
+        <address>Alberta Energy Regulator</address>
+        <address>4th Floor, Twin Atria Building</address>
+        <address>4999-98 Avenue NW</address>
+        <city>Edmonton</city>
+        <state>Alberta</state>
+        <postal>T6B 2X3</postal>
+        <country>Canada</country>
+      </cntaddr>
+      <cntvoice>(780) 422-1927</cntvoice>
+      <cntfax>(780) 422-1918</cntfax>
+      <cntemail>AGS-Info@aer.ca</cntemail>
+      <hours>8:00 a.m. to 12:00 p.m. and 1:00 p.m. to 4:30 p.m.</hours>
+    </cntinfo>
+  </distrib>
+  <distliab>The Alberta Energy Regulator/Alberta Geological Survey (AER/AGS) licenses this information under the Open Government License - Alberta. Any references to proprietary software in our documentation, and/or any use of proprietary data formats in our releases, do not constitute endorsement by the AER/AGS of any manufacturer&apos;s product.</distliab>
+</distinfo>
+<metainfo>
+  <metd>20131107</metd>
+  <metc>
+    <cntinfo>
+      <cntorgp>
+        <cntorg>Alberta Geological Survey</cntorg>
+        <cntper>Publications and Marketing Advisor</cntper>
+      </cntorgp>
+      <cntpos>Publications and Marketing Advisor</cntpos>
+      <cntaddr>
+        <addrtype>mailing and physical</addrtype>
+        <address>Alberta Energy Regulator</address>
+        <address>4th Floor, Twin Atria Building</address>
+        <address>4999-98 Avenue NW</address>
+        <city>Edmonton</city>
+        <state>Alberta</state>
+        <postal>T6B 2X3</postal>
+        <country>Canada</country>
+      </cntaddr>
+      <cntvoice>(780) 422-1927</cntvoice>
+      <cntfax>(780) 422-1918</cntfax>
+      <cntemail>AGS-Info@aer.ca</cntemail>
+      <hours>8:00 a.m. to 12:00 p.m. and 1:00 p.m. to 4:30 p.m.</hours>
+    </cntinfo>
+  </metc>
+  <metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
+  <metstdv>FGDC-STD-001-1998</metstdv>
+  <mettc>local time</mettc>
+  <metac>none</metac>
+  <metuc>none</metuc>
+</metainfo>
+</metadata>
