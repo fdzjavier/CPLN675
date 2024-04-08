@@ -1,0 +1,797 @@
+---
+title: "Zillow Homesale Prediction Model, Philadelphia"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+    number_sections: yes    
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+# Introduction
+
+In response to the growing demand by Zillow for a housing market model that incorporates local context, we have been tasked with trying to create an improved model with greater precision and generalizability for predicting home sale prices. In order to accomplish this task we developed an Ordinary Leased Squared (OLS) Linear regression model using data from multiple sources. Our model relies on a combination of data on the internal characteristics of a home - provided to us by the client, additionally, we incorporate external data including Philadelphia Open Data and the American Community Survey data from U.S Census Bureau to gather comprehensive information in order to try to create an accurate and generalizable model for home sales prices in the Philadelphia housing market. 
+
+This report outlines our approach and methods and the importance of understanding the local context alongside internal characteristics. Our model is far from perfect, but we believe it will provide us the insight necessary to reflect an accurate depiction of what homebuyers value and how their preferences reflect the evolving housing market. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+library(tidyverse)
+library(sf)
+library(spdep)
+library(caret)
+library(ckanr)
+library(FNN)
+library(viridis)
+library(grid)
+library(gridExtra)
+library(corrr)      # another way to plot correlation plot
+library(kableExtra)
+library(jtools)     # for regression model plots
+library(ggstance) # to support jtools plots
+library(ggpubr)    # plotting R^2 value on ggplot point scatter
+library(broom.mixed) # needed for effects plots
+library(tidycensus)
+library(scales)
+library(ggiraph)
+library(plotly)
+library(stargazer)
+
+palette5 <- c("#ffffcc","#a1dab4","#41b6c4","#2c7fb8","#253494")
+options(scipen=999)
+
+source("https://raw.githubusercontent.com/urbanSpatial/Public-Policy-Analytics-Landing/master/functions.r")
+```
+
+# Load House Sales Data from Github
+
+We start by importing the home sales data already provided to us for our study. This dataset includes key information on internal home characteristics, such as number of bathrooms, number of stories, total livable area, exterior home condition, and interior home condition. The provided dataset includes 23,881 data points of which 23,779 have sales price data that can be used to develop the home sales prediction model. We carefully reviewed the data to identify which internal home characteristics can be used in home sales price model. Some home attributes like the presence of central air are incomplete and contain a significant number of blank/no data values which prevent us from using them in our model. While that was not the only attribute that had incomplete data, there are 102 homes labelled as "challenge" data which are filtered from the training model. These were used as predictions later on.  
+
+Some variables required cleaning and usage of deductive reasoning to ensure data completeness. The logic which we use to replace unknown values are outlined below:
+
+* 3,679 homes are listed as having zero bathrooms or did not have data on the number of bathrooms. It is assumed these homes contained one bathroom.
+* 21 homes do not have data on interior condition - an assumption is made that these homes had an average interior condition.  
+* 1 home does not have data on exterior condition - an assumption is made that this home had an average interior condition
+* 208 homes do not have data on the number of fireplaces - an assumption is made that these homes do not have a fireplace, this assumption is based on the provided metadata which indicates that homes with no fireplaces were left blank. 
+
+The usage of estimated attributes for these points were necessary in order to ensure that as many homes possible in the dataset can be utilized in the model. As a result, 99.57% of the house data provided to us was fit for model training. 
+
+```{r read_github_data, results = "hide", message=FALSE, warning=FALSE}
+house_data <- st_read("https://raw.githubusercontent.com/mafichman/musa_5080_2023/main/Midterm/data/2023/studentData.geojson") %>%
+  dplyr::select("objectid","central_air","exterior_condition", "fireplaces", "garage_spaces", "interior_condition", "mailing_street", "location", "number_of_bathrooms", "number_of_bedrooms","number_of_rooms","number_stories","sale_price","sale_date","total_area","total_livable_area","year_built","toPredict") %>%
+  st_transform('EPSG:2272')
+
+#Do some feature enginerring
+house_data <- house_data %>%
+  mutate(
+    #Recode exterior condition so that four is best condition, group some categories together
+    exterior_condition = as.numeric(recode(exterior_condition, '7'='1', '6'='2', '5'='3', '4'='3', '3'='4', '2'='4', '1'='4')), 
+    #Assumed averager condition is value is NA
+    exterior_condition = ifelse(is.na(exterior_condition),2,exterior_condition),
+    #Set blank values to 0, assumed that if value is blank there are no fireplaces based on metadata.
+    fireplaces = ifelse(is.na(fireplaces),0,fireplaces),
+    #Assumed there is always at least one bathroom - if property has 0 bathrooms assigned a value of 1.
+    number_of_bathrooms = ifelse(number_of_bathrooms == 0,1,number_of_bathrooms),
+    number_of_bathrooms = ifelse(is.na(number_of_bathrooms),1,number_of_bathrooms),
+    #Assumed averager condition is value is NA
+    interior_condition = ifelse(is.na(interior_condition),4,interior_condition),
+    interior_condition = ifelse(interior_condition==0,4,interior_condition),
+    #Assuumes total livable area is the mean where it is equal to 0
+    total_livable_area = ifelse(total_livable_area==0,mean(total_livable_area),total_livable_area))
+```
+
+
+# Get Other Data
+
+In order to develop an enhanced home sales prediction model, we acquire data that looks beyond the internal characteristics of a home. We gather data on the external characteristics of the neighborhood surrounding a home including the house's proximity to key amenities, like urban corridors, public schools, restaurants, and green space. These external characteristics are likely to influence price. We also found that a home price goes beyond the physical characteristics but socioeconomic too, meaning we had to investigate the social demographics and economics of areas and see if that can change how the model thinks.
+
+## Census Data
+
+The first source used is data from the U.S Census Bureau, specifically the American Community Survey (ACS). We use data from the 2021 five year survey, which is the most recent year and uses data over a 5-year timespan. We also leveraged Social Explorer - a website which makes ACS data more accessible and easier to identify variables which we hypothesize which would likely correlate with home sales price. After a thorough review - we selected the following data from ACS for potential inclusion in our housing sales price model. 
+
+* **White Home Ownership Rate**: Calculated as the Number of Homes where the home owner is white divided by the total housing units in the census tract. This variable gives our model a racial element. Race unfortunately continues to correlate with home sales prices in Philadelphia due to the legacy of redlining. We include the white home ownership as a potential predictor of sales prices because we hypothesize that home values will likely be higher in areas where the majority of home owners are white. 
+
+* **Median Household Income**: Median income levels can be an important predictor of home sales prices. We hypothesize that areas where median income levels are high are also likely to have high home sales values.  
+
+* **Percent of Households with Public Assistance Income**: Households receiving public assistance income are likely financial strained, and do not earn enough income to pay bills including their mortgage. We hypothesize that areas where a large number of households receive public assistance are likely to have lower home sales values. 
+
+* **Percent of Homes which are occupied**: Philadelphia contains many vacant lots and properties when compared to other cities. We hypothesize that census tracts where a large number of homes are not occupied are likely to have lower home values. 
+
+These variables provide a basic overview of demographic and income characteristics of neighborhoods in Philadelphia.
+
+```{r load_key, warning = FALSE, eval = FALSE, message=FALSE}
+census_api_key("414406b135438f0931a42af29200ddeb3f371958", overwrite = TRUE)
+```
+
+```{r acs_vars, include=FALSE}
+
+acs_vars <- c("B01001_001E", # ACS total Pop estimate
+              "B25001_001E", # Estimate of total housing units
+              "B25002_003E", # Number of vacant housing units
+              "B19013_001E", # Median HH Income ($)
+              "B19058_002E", # Households with Public Assistance Income
+              "B25003_002E", # Owner Occupied Housing Units
+              "B25006_002E", # Homeowner is White
+              "B25006_001E") # Total Occupied Housing Units 
+```
+
+```{r get_acs_2021, message=FALSE, warning=FALSE, results='hide'}
+acsTractsPHL.2021 <- get_acs(geography = "tract",
+                             year = 2021, 
+                             variables = acs_vars, 
+                             geometry = TRUE, 
+                             state = "PA", 
+                             county = "Philadelphia", 
+                             output = "wide") %>%
+  st_transform('EPSG:2272')
+```
+
+```{r do_some_dplyr, warning=FALSE, cache=FALSE}
+acsTractsPHL.2021 <- acsTractsPHL.2021 %>%
+  dplyr::select (GEOID, NAME, all_of(acs_vars))
+
+acsTractsPHL.2021 <- acsTractsPHL.2021 %>%
+  rename (totalPop = B01001_001E,
+          totalHU = B25001_001E,
+          totalVacant = B25002_003E,
+          medHHInc = B19013_001E,
+          HHAssistedInc = B19058_002E,
+          OwnerOccH = B25003_002E,
+          WhiteHomeowner = B25006_002E,
+          TotalOccH = B25006_001E) %>%
+  dplyr::filter(totalPop != 0)
+
+acsTractsPHL.2021 <- acsTractsPHL.2021 %>%
+  mutate(HHOccupiedRate = ifelse(OwnerOccH==0,0,OwnerOccH/totalHU),
+         WhiteHOrate = ifelse(WhiteHomeowner==0,0,WhiteHomeowner/TotalOccH),
+         AssistedIncRate = ifelse(HHAssistedInc==0,0,HHAssistedInc/totalHU),
+         medHHInc = ifelse(is.na(medHHInc),mean(medHHInc,na.rm=TRUE),medHHInc))
+```
+
+## Get Data from Open Data Philly
+
+Open Data Philly is an open source website that provides a catalog of free data, which is endorsed by the City of Philadelphia. The platform includes datasets provided by the city and other partner organizations. We utilize data from Open Data Philly to help categorize, describe, and develop a profile for key geographic characteristics which might impact home sale prices.
+
+The following datasets extracted are provided below: 
+
+* [Planning Districts](https://opendataphilly.org/datasets/planning-districts/) - this analysis will use planning districts will be used as a substitute for neighborhoods.
+
+* [Redevelopment Areas](https://opendataphilly.org/datasets/redevelopment-certified-areas/) - this dataset provides information on blighted areas, blighted areas are defined by the city as "meeting one of seven city mandated criteria, including unsafe, unsanitary and inadequate conditions; economically or socially undesirable land use; and faulty street and lot layout". We hypothesized that prices are likely to be lower in blighted areas.
+
+* [Total Restaurants](https://opendataphilly.org/datasets/neighborhood-food-retail/) - this dataset includes information on the number of restaurants per census block. The dataset was created from the Neighborhood Food Retail in Philadelphia Report. Restaurants acts as a potential predictor of home sales prices because we hypothesized that areas with more restaurants are likely to have higher home sales price values. 
+
+```{r get open_phily_data, results = "hide", warning=FALSE}
+planning_districts <- st_read("https://opendata.arcgis.com/datasets/0960ea0f38f44146bb562f2b212075aa_0.geojson")%>%
+  st_transform('EPSG:2272')
+
+redevelopment_areas <- st_read("https://data-phl.opendata.arcgis.com/datasets/80f2c71305f5493c8e0aab9137354844_0.geojson") %>%
+  dplyr::filter(TYPE == 'Redevelopment Area Plan and Blight Certification' & STATUS == 'Active') %>%
+  st_transform('EPSG:2272')
+
+restaurants <- st_read('https://opendata.arcgis.com/datasets/53b8a1c653a74c92b2de23a5d7bf04a0_0.geojson')%>%
+  st_transform('EPSG:2272') %>%
+  dplyr::select(GEOID10,TOTAL_RESTAURANTS)
+
+restaurants <- restaurants %>%
+  mutate(rest_per_sqmi = as.numeric(TOTAL_RESTAURANTS / (st_area(restaurants)/358700000)))
+
+```
+
+## Load School Test Score Data
+
+The proximity to the best public schools is another key characteristic of a desirable neighborhood. We use data on student performance on the [PSSA/Keystone](https://www.philasd.org/performance/programsservices/open-data/pssakeystone/) test to help provide an understanding of school performance. PSSA/Keystone includes three sections: Science, Math, and English Language Arts. Students in Grades 3-8 complete this test and each student receives a score of "Below Basic", "Basic", "Proficient" or "Advanced" on each section. Our analysis uses the percent of students who scored "Advanced" or "Proficient" at each school indicating the school's overall quality.  
+
+In order to get one value to input into our model, the percentage values on the three sections are averaged together get a single number for each school. As an example, if School A had 20 percent of students score proficient or advanced in math, 25 percent score proficient or advanced in sciences, and 35 percent scored proficient or advanced in English. A value of 26.66 percent would be calculated as the net performance across all three sections for School A, 26.66 is equal to the average of 20, 25, and 35 percent.
+
+One limitation is our assumption that residents using public schools are likely to send their children to the public school which is closest to their home. Thus, each home included in the model is assigned the test score of the closest school to the home. Schools that are near "planning district" borders may not reflect nearby homes that affiliate with that school and are classified as a different neighborhood.
+
+```{r school_data, cache=FALSE, results = "hide", message=FALSE}
+school_test_data <- read.csv('Data\\Schools\\2022 PSSA Keystone Actual (School_S).csv')
+schools <- read.csv('Data\\Schools\\2022-2023 Master School List (20230110).csv')
+
+schools <- schools %>%
+  rename(ulcs_code = ULCS.Code) %>% 
+  separate(col=GPS.Location, into=c('Lat', 'Long'), sep=', ') %>% 
+  st_as_sf(coords = c("Long", "Lat"), crs = "EPSG:4326") %>%
+  dplyr::select(ulcs_code, School.Name..ULCS., School.Level, Admission.Type)
+
+school_test_data <- school_test_data %>%
+  dplyr::filter(category == 'All' & grade == 'Grades 3-8' & profadv_score != 's')  %>%
+  mutate(profadv_score = as.double(profadv_score))
+
+school_test_data_summ <- school_test_data %>% 
+  group_by(ulcs_code, publicationname) %>% summarize(mean_profadv = mean(profadv_score))
+
+schools <- schools %>%
+  left_join(school_test_data_summ, by='ulcs_code') %>%
+  drop_na() %>%
+  st_transform('EPSG:2272')
+
+```
+
+## Get Data on number of Trees from Open Data Philly
+
+Trees help provide environmental benefits and shade. Residents may place value on having greenness in their neighborhood and tress indicate community care for a neighborhood. We consider including the number of trees in the area surrounding the home in our model because we believe that greener areas with more trees are likely to have higher home sales values. 
+
+Open Data Philly includes a data layer showing all trees in Philadelphia. We calculate the number of trees per square mile in each census tract and include this as a potential input in our home sales price model.
+
+``` {r get_process_tree_data, results = "hide", message=FALSE, warning=FALSE}
+#Get Data on trees in Philadelphia
+trees <- st_read('https://opendata.arcgis.com/api/v3/datasets/5abe042f2927486891c049cf064338cb_0/downloads/data?format=geojson&spatialRefId=4326&where=1%3D1')%>%
+  st_transform('EPSG:2272')
+
+#Calculate the number of trees per census tract and convert to trees per square mile to normalize
+acsTractsPHL.2021 <- st_intersection(acsTractsPHL.2021, trees) %>% #Determine what census tract each tree is in using intersection
+  st_drop_geometry() %>%
+  group_by(GEOID) %>% summarize(tree_count = n()) %>% #Count the number of trees in each Census tract
+  right_join(acsTractsPHL.2021, by='GEOID') %>% #Join tree cont to census tract Dataframe
+  st_sf() %>%
+  mutate(trees_per_mi = as.double(tree_count / (st_area(acsTractsPHL.2021)/358700000)))
+```
+
+## Urban Corridors
+
+Open Data Philly includes a dataset on urban corridors. We calculate the distance from each home in our home sales dataset to the nearest urban corridor. Living near an urban corridor increases proximity to amenities like restaurants, decreases transportation costs, and improves access to grocery stores. We hypothesize that living near an urban corridor should raise home values. However, there could be exceptions to this pattern. Residents living in car-dependent neighborhoods on the outskirts of the city may prefer to be away from corridors, preferring quietness and privacy over proximity to urban corridors. Because of Philadelphia's mix between urban-city and suburbia, the correlation in the model may become inconclusive or have a bias towards one type of environment (urban or suburban).
+
+```{r corridors data, results = "hide", message=FALSE, warning=FALSE}
+corridors_url <- "https://opendata.arcgis.com/datasets/f43e5f92d34e41249e7a11f269792d11_0.geojson"
+corridors <- st_read(corridors_url, quiet= TRUE) %>% st_transform('EPSG:2272')
+
+nearest_fts <- st_nearest_feature(house_data,corridors)
+
+house_data$dist_urb_corridor <- as.double(st_distance(house_data, corridors[nearest_fts,], by_element=TRUE))
+
+```
+
+## Shootings
+
+We calculate the number of shootings within a 1/2 mile and 1/4 mile radius of each home, and include both these variables as potential inputs to our housing sales price model. Shootings can impact home sales values because of their impact on the perception of crime in the area and the buyer's concern for personal safety or property damage. Our analysis only includes shootings which have taken place in 2023, we focus on shootings in 2023 because recent shootings are likely to be the primary driver of current perceptions of crime. 
+
+The shootings data was also obtained through Open Data Philly. The data on shootings is part of a larger crime database which the city of Philadelphia stores on Carto.
+
+```{r Shooting_data, results = "hide"}
+shootings_url <- "https://phl.carto.com/api/v2/sql?q=SELECT+*+FROM+shootings&filename=shootings&format=geojson&skipfields=cartodb_id"
+shootings <- st_read(shootings_url) %>% st_transform('EPSG:2272') %>%
+  mutate(date_=as.Date(date_, format = "%d-%m-%Y"))  %>%
+  dplyr::filter(date_ > '2023-01-01') %>%
+  dplyr::select(location)
+
+house_data <- st_intersection(shootings,st_buffer(house_data,2640)) %>%
+  st_drop_geometry() %>%
+  count(objectid) %>%
+  rename(shooting_halfmile = n) %>%
+  right_join(house_data, by='objectid') %>%
+  mutate(shooting_halfmile = ifelse(is.na(shooting_halfmile),0,shooting_halfmile)) %>%
+  st_sf()
+
+house_data <- st_intersection(shootings,st_buffer(house_data,2640/2)) %>%
+  st_drop_geometry() %>%
+  count(objectid) %>%
+  rename(shooting_quartermile = n) %>%
+  right_join(house_data, by='objectid') %>%
+  mutate(shooting_quartermile = ifelse(is.na(shooting_quartermile),0,shooting_quartermile)) %>%
+  st_sf()
+```
+
+## Join All Data to House Sales Data
+
+After gathering data from various sources, we now have to coalesce all the data into one final database for our prediction model. 
+
+```{r Joining All Tables}
+HDJoin <- st_intersection(house_data, restaurants %>%
+                               dplyr::select("TOTAL_RESTAURANTS", "rest_per_sqmi"))
+HDJoin <- st_intersection(HDJoin, planning_districts %>%
+                             dplyr::select("DIST_NAME"))
+
+HDJoin <- st_join(HDJoin,schools %>% dplyr::select('mean_profadv'), join=st_nearest_feature)
+
+HDJoinRDAs <- HDJoin[st_intersects(HDJoin, redevelopment_areas) %>% lengths > 0, ] %>% 
+  mutate(DevelopmentArea = 1)
+  
+NotRDAs <- HDJoin[!st_intersects(HDJoin, redevelopment_areas) %>% lengths > 0, ] %>% 
+  mutate(DevelopmentArea = 0)
+
+HDBind <- rbind(NotRDAs, HDJoinRDAs)
+
+HDFinal_alldata <- st_intersection(HDBind, acsTractsPHL.2021) 
+```
+
+## Split Data
+
+From the consolidated database we select just the homes where the 'toPredict' column is equal to MODELLING. The selected 23,779 rows contain the home data which will be used in our model development. 
+
+```{r split_data}
+HDFinal <- HDFinal_alldata %>%
+  dplyr::filter(toPredict == "MODELLING")
+```
+
+# Data Exploration
+
+Next we explore our data, exploring the data identifies which of the variables correlate with price and are best suited for inclusion in our model. 
+
+## Summary Statistics 
+
+The table of summary statistics provides us with statistical information about each variable in our database. The summary statistics table includes the Mean Value, the standard deviation, and the minimum and maximum values. The 'N' represents the number of data points in the column - instances where the N is not equal to 23,799 represent incomplete data.
+
+```{r Summary Statistics}
+HDFinal_nongeom <- HDFinal %>% st_drop_geometry()
+HDFinal_nongeom <- HDFinal_nongeom %>%
+  dplyr::select_if(is.numeric) %>%
+  dplyr::select(-objectid, -totalPop, -year_built, -totalHU, -number_of_rooms, -TotalOccH)
+
+stargazer(HDFinal_nongeom, type = 'text', title= "Table 1: Summary Statistics")
+```
+
+## Correlation Matrix
+
+A correlation matrix compares factors against one another to see how related they are. Each box presented below indicates whether there is a correlation (positive or negative) or little relationship between two variables. A correlation near one indicates a strong positive correlation, a correlation near -1 indicates a strong negative correlation, a correlation near 0 indicates no linear relationship between two variables. 
+
+The correlation matrix shows strong correlation between many factors. A review of 'sales_price' column matrix allows us to identify which variables have the strongest correlation with sales prices. We can observe that the variables Assisted Income Rate (AssistedIncRate), shootings within a half mile (shooting_halfmile), and interior condition are negatively correlated with rent. Conversely, the tree count, number of bathrooms, number of fireplaces, and total livable area have a positive correlation with sales price. Almost all variables have a measurement of correlation, but in order to prevent redundancy or overlap in indicators, we are looking for variables that are distinct and have a strong correlation with sale price. 
+
+We choose to include in our model variables where the absolute value of the correlation is +-0.3 or higher. 
+
+```{r correlation_matrix, fig.width=12, fig.height=12, message=FALSE}
+HDFinal_nongeom %>% 
+  correlate() %>% 
+  autoplot() +
+  geom_text(aes(label = round(r,digits=2)), size = 3.5, order = "hclust", type = "upper", tl.cex = 3)
+
+```
+
+## Home Price Scatterplots 
+
+The four graphs below represent four key dependent variables that broadly cover each aspect of a neighborhood in order to determine house prices. Assisted Income focuses on the homeowner's socioeconomic status, resulting in an inverse relationship. Tree count and total livable area are directly correlated with a house's desirability because of home size being considered a luxury and more trees often indicates better care for a neighborhood. The last dependent variable we look at is the white homeowner rate. White homeownership can indicate a "perceived" higher price value because of racial segregation, wealth inequality, and potential gentrification. 
+
+```{r dependent variable correlation, fig.height=6, fig.width=15, message=FALSE}
+## Variables: total_livable_area, tree_count, WhiteHomeowner, AssistedIncRate
+HDFinal_nongeom %>%
+  dplyr::select(sale_price, total_livable_area, tree_count, WhiteHOrate, AssistedIncRate) %>%
+  filter(sale_price <= 1000000) %>%
+  filter(total_livable_area <= 10000) %>%
+  gather(Variable, Value, -sale_price) %>% 
+   ggplot(aes(Value, sale_price)) +
+     geom_point(size = .5) + geom_smooth(method = "lm", se=F, colour = "#FA7800") +
+     facet_wrap(~Variable, nrow = 1, scales = "free") +
+     labs(title = "Price as a function of continuous variables") +
+     plotTheme()
+```
+
+## Maps
+
+This section of the reports includes maps of dependent variable (home sales prices) and five independent variables.
+
+### Home Prices 
+
+This map explores the variation in 2021 home prices across Philadelphia. We observe that the most expensive areas are located near Center City or in areas in Northeast Philadelphia (e.g.Chestnut Hill) and Northwest Philadelphia (e.g. Parkwood). We notice a ring-like effect in the city where the most expensive areas are either in the core center or furthest away where there is the least interaction the urban center. The areas with the lowest home sales prices are located just North of Center City and West Philadelphia. 
+
+```{r Map of Home Prices, results = "hide"}
+HDFinal <- HDFinal %>% 
+  mutate(sale_class = cut(sale_price, breaks = c(0, 250000, 500000, 750000, 1000000, max(HDFinal$sale_price, na.rm=TRUE))))
+
+ggplot()+
+    geom_sf(data=planning_districts,fill='grey80',color='transparent')+
+    geom_sf(data=HDFinal, size=0.75,aes(colour = q5(sale_class)))+
+    geom_sf(data=planning_districts,fill='transparent',color='black')+
+  scale_color_manual(values = palette5,
+                    name = "Sales Price (USD)",
+                    na.value = 'grey80',
+                    labels = c('$0-$250k', '$250k-$500k', '$500k-$750k', '$750k-$1m', '$1m+'))+
+  mapTheme()
+    
+```
+
+
+### Assisted Income Levels
+
+This map shows the rate of people requiring assisted income in the city. We can observe that the central northeast, areas such as Kensington, Fairhill, and Feltonville are most reliant on government assistance for income. These areas happen to be yellow and green in the map. Many of the areas surrounding these neighborhoods are also affected by the poverty and have a high reliance on government assistance for income, showing the aura that the impoverished area emits onto its adjacent areas. 
+
+Comparing this map to our home sales map identifies clear spatial patterns. Specifically neighborhoods that have a high reliance on assistance for income also have lower home sales prices.   
+ 
+```{r 3 Interesting Maps Part 1}
+ggplot()+
+  geom_sf(data=planning_districts,fill='grey80',color='transparent')+
+  geom_sf(data=acsTractsPHL.2021,aes(fill = (AssistedIncRate * 100)))+
+  scale_fill_viridis(name = "Assisted Income Per 100 Households")+
+  geom_sf(data=planning_districts,fill='transparent',color='black')+
+mapTheme() 
+```
+
+### Standardized Test Performance 
+
+The school system in a neighborhood can be a deal-breaker factor for families seeking a home in an area. The Keystone Exam is the State's index of evaluating school performance and student's education quality. The map below shows which schools have the best performance on this exam. According to the Keystone exam, the best schools are located in Northeast and Northwest Philadelphia and some parts of South Philadelphia.   
+
+```{r Interesting Maps Part 2}
+#profadv is the percentage of students recieved proficient OR advanced scores on Keystore Exam by Penn DOE
+ggplot()+
+  geom_sf(data=planning_districts,fill='grey80',color='transparent')+
+  geom_sf(data=schools,aes(colour = q5(mean_profadv)),size=2.5)+
+  scale_color_viridis_d(name = "Student Performance on Keystone Exam", labels = c('Poor', 'Below Average', 'Average', 'Above Average', 'Excellent'))+
+  geom_sf(data=planning_districts,fill='transparent',color='black')+
+  labs(title="Performance on Keystone Exam")+
+  mapTheme()
+```
+
+### Heat Map of Shootings
+
+We create a heat map that shows the "hot spots" of where shootings occurred most frequently in 2023. Similarly to government assistance, we notice crime is clustered just north of the city center and it has spillover in areas north of said cluster. The same areas that have high assisted income, poor school performance, also have higher rates of crime (specifically gun violence), forecasting the model's interpretation on the home values in these places. 
+
+```{r Interesting Maps Part 3}
+ggplot()+
+  geom_sf(data=planning_districts,fill='grey80',color='transparent')+
+  stat_density2d(data = data.frame(st_coordinates(shootings)), 
+                 aes(X, Y, fill = ..level.., alpha = ..level..),
+                 size = 0.01, bins = 40, geom = 'polygon',show.legend = FALSE) +
+  scale_fill_gradient(low = "white", high = "red")+
+  scale_alpha(guide = "none") +
+  labs(title = "Density of Reported Shootings", subtitle = 'Areas with High Density Shown in Red') +
+  geom_sf(data=planning_districts,fill='transparent',color='black')+
+  mapTheme()
+```
+
+
+### Interactive Map of Houseowner-Occupied Rate
+
+Provided below is an map that depicts where the Homeowner occupies the house they reside in, deferring from places where people rent. If you hover above the tract, you'll see the exact rate of home ownership in the area. Other tools are available on the top right of the map after hovering over the figure. 
+
+```{r Actually something engaging}
+ggplotly(
+  ggplot(acsTractsPHL.2021)+
+  geom_sf(aes(fill = HHOccupiedRate * 100))+
+  scale_fill_gradient(low = "black", high = "yellow", name = "Rate of Home Ownership")+
+  mapTheme()
+)
+
+```
+
+# Methods
+
+Our regression analysis will use an Ordinary Least Squares multi-variate linear regression model. As in it uses multiple independent variables to predict a single dependent variable. A linear relationship between the dependant and independant variables is assumed. In our analysis the dependent variable is sales price. The independent variables which are used to predict sales price are selected based on a review of the summary statistics, correlation matrix, scatter plots, and maps in the data exploration section of the report. 
+
+The following 13 variables were selected for inclusion in our model:
+
+* **shooting_halfmile:** Number of Shootings with a half mile of the home
+* **interior_condition:** Interior condition of the home, defined on a 1-7 scale with one representing the best interior condition
+* **total_livable_area:** Total Livable Area
+* **number_of_bathrooms:** Number of bathrooms in the home.
+* **DIST_NAME:** Planning District
+* **mean_profadv:** Student performance on the keystone exam at the nearest school
+* **tree_count:** Number of tree in the census tract the home is located in
+* **medHHInc:** Median Household Income for the census tract the home is located in
+* **exterior_condition:** Exterior condition on a 1-4 scale with four representing the best interior condition.
+* **fireplacees:** Number of fireplaces
+* **WhiteHOrate:** White Home owner rate for the census tract the home is located in
+* **AssistedIncRate:** Proportion of Households Receiving Assisted Income for the census tract the home is located in
+* **rest_per_sqi:** Number of restaurants per square mile in the census block the home is located in.
+
+To develop our model, we use a training and testing approach. The training dataset contains 60 percent of the home sales data while the testing data contains 40 percent of the available data. The training dataset is used to determine the model parameters (any numeric factor). After the model parameters are determined, the model is applied to the testing data to make predictions on the unseen data. We then compare our predicated data to the actual sales prices values included in the the testing data to determine the error. We take the absolute value of the error to get an absolute error. Additionally, the absolute percentage error (APE) is calculated by dividing the absolute error by the predicted value. 
+
+Having developed our model, we build in checks to see if our sales price errors are spatially clustered together. It is important to check for spatial clustering of errors because the lack of error clustering may indicate that there are location patterns in the data which the model is not adequately capturing.
+
+Additionally, we assess the generalizability of the model, to see if the model works well across neighboorhoods. Also, this assessment shows us if performance is consistent regardless of income levels and racial dynamics. 
+
+
+# Training and Test Sets
+
+## Table of Model Results
+
+The table below presents the results of our linear regression model. The coefficient for each independent variable is presented - the coefficient represents the change in sales prices when the corresponding independent variable changes by one, while holding all other variables constant. As an example, if our coefficient for total livable area was "180" it means that our model estimates that sales prices increases by one dollar when the square footage of a property increases by 180 square feet, all other independent variables held constant.
+
+We also present the R squared for our model. R squared is amount of variability the model has from the independent variable, sale price. What this means The R squared for our model is near 0.65, indicating 65% of the variance in price is explained by our model. 
+
+
+```{r Training and Test Set}
+inTrain <- createDataPartition(
+              y = paste(HDFinal$DIST_NAME), 
+              p = .60, list = FALSE)
+Philly.training <- HDFinal[inTrain,] 
+Philly.test <- HDFinal[-inTrain,]  
+ 
+reg.training <- 
+  lm(sale_price ~ ., data = as.data.frame(Philly.training) %>% 
+                        dplyr::select(sale_price, shooting_halfmile, interior_condition, total_livable_area, 
+                        DIST_NAME, mean_profadv, tree_count, medHHInc, 
+                        exterior_condition, fireplaces, WhiteHOrate, AssistedIncRate,
+                        rest_per_sqmi, number_of_bathrooms))
+
+stargazer(reg.training,type='text', title='Sales Price Model Results', keep.stat = c('n','rsq'))
+```
+
+# Table of Goodness of Fit
+
+Below shows how far off it our predicated sales prices values are from the actual sales price values. We present both the Mean Absolute Error (MAE) and the Mean Absolute Percentage Error (MAPE). Because we are working with large values (i.e home sales prices), absolute error can be quite large. Instead we are more interested in the percentage error because that error depicts relativity rather than a pure value, as even the absolute error value can mean different levels of accuracy when comparing low and high value homes. 
+
+```{r Reg Training}
+Philly.test <-
+  Philly.test %>%
+  mutate(Regression = "Baseline Regression",
+    sale_price.Predict = predict(reg.training, Philly.test),
+         sale_price.Error = sale_price.Predict - sale_price,
+         sale_price.AbsError = abs(sale_price.Predict - sale_price),
+         sale_price.APE = (abs(sale_price.Predict - sale_price)) / sale_price)
+
+Philly.test %>% 
+  st_drop_geometry() %>%
+  summarise(MAE = mean(sale_price.AbsError),
+            MAPE = mean(abs(sale_price.APE)*100)) %>%
+  kbl(col.name=c('Mean Absolute Error','Mean Absolute Percentage Error')) %>%
+  kable_classic()
+```
+
+# Cross Validation
+
+Our analysis so far, has focused on a single training and test dataset. In order to cross validate (measure out) the model and assess its generalizability to new data it is necessary to run the model multiple times using different training data. This analysis uses a process called K-Fold Cross Validation - this method involves splitting the data into 100 different training datasets. In each training dataset a different set of home sales data points are excluded from the model and these excluded points are used to test the model error. 
+
+The scatter plot below shows a histogram of the Mean Absolute Error (MAE) for all 100 of the analyses. The MAE varies between 62,500 Dollars and 100,00 Dollars. The distribution of the Mean Absolute Errors has relative bell curve distribution, and peaks at 75,000 USD. This normal distribution proves that there is consistency in its depictions.    
+
+```{r cross_validation}
+
+fitControl <- trainControl(method = "cv", number = 100)
+set.seed(825)
+
+reg.cv <- 
+  train(sale_price ~ ., data = st_drop_geometry(HDFinal) %>% 
+          dplyr::select(sale_price, shooting_halfmile, interior_condition, total_livable_area, 
+                        DIST_NAME, mean_profadv, tree_count, medHHInc, 
+                        exterior_condition, fireplaces, WhiteHOrate, AssistedIncRate,
+                        rest_per_sqmi, number_of_bathrooms), 
+        method = "lm", trControl = fitControl, na.action = na.pass)
+
+ggplot(reg.cv$resample, aes(x=MAE)) + 
+  geom_histogram(color='white',fill="orange",bins=100)+
+  scale_x_continuous(labels = comma,limits=c(0,150000),breaks=c(25000,50000,75000,100000,125000,150000))+
+  scale_y_continuous(breaks=c(0,2,4,6,8,10))
+
+```
+
+# Plot Predicted Prices
+
+The graph below depicts the difference between our predictive model and "perfect predictions", defined as 100% accuracy. For the vast majority of clusters our model is quite accurate and coincides with the line of perfection. However, as there are fewer and higher priced houses, such as the ones over 2 million, the model becomes skewed to underestimate their value. The other limitations to the model include the negative results, there are multiple points that are below the (0,0) mark which indicate the model assumed a negative value on a home despite of the fact the actual sales price was a positive integer. Regardless, the model happens to slightly overestimate these home values, as seen by the model prediction line (green) over the line of perfection. One could use such data as an indicator of a "fixer-upper", houses that require large amount of maintenance or abysmal conditions that it would cost more to repair it than to purchase. 
+
+```{r plot_prediction, message=FALSE}
+
+Philly.test %>%
+  dplyr::select(sale_price.Predict, sale_price) %>%
+    ggplot(aes(sale_price, sale_price.Predict)) +
+  geom_point() +
+  stat_smooth(aes(sale_price, sale_price), 
+             method = "lm", se = FALSE, size = 1, colour="#FA7800") + 
+  stat_smooth(aes(sale_price, sale_price.Predict), 
+              method = "lm", se = FALSE, size = 1, colour="#25CB10") +
+  labs(title="Predicted sale price as a function of observed price",
+       subtitle="Orange line represents a perfect prediction; Green line represents prediction") +
+  scale_x_continuous(labels = comma)+
+  scale_y_continuous(labels = comma)+
+  plotTheme()
+```
+
+# Fix Zero Values
+
+In order to remove negative predicted home sales values discussed above we set all the predicted home sales prices to 10,100 USD which is the lowest sale price value in Philadelphia. 10,100 acts as a lower bound and incorporates a rule that predication can never be below this bound. This correction ensures that all homes have a positive predicted price. We recommend incoprating this assumption into the model whenever the model is used to predict prices. Incoprating this change reduces our MAPE and APE when compared to the MAPE and APE prested in the previously.
+
+```{r fix_zero_values, message=FALSE}
+Philly.test <- Philly.test %>%
+      mutate(sale_price.Predict = ifelse(sale_price.Predict <= 0, 10100, sale_price.Predict),
+         sale_price.Error = sale_price.Predict - sale_price,
+         sale_price.AbsError = abs(sale_price.Predict - sale_price),
+         sale_price.APE = (abs(sale_price.Predict - sale_price)) / sale_price)
+
+Philly.test %>% 
+  st_drop_geometry() %>%
+  summarise(MAE = mean(sale_price.AbsError),
+            MAPE = mean((sale_price.APE)*100)) %>%
+  kbl(col.name=c('Mean Absolute Error','Mean Absolute Percentage Error')) %>%
+  kable_classic()
+```
+
+
+# Spatial Pattern of Errors
+
+## Map of Residual Errors 
+
+The map below shows the absolute margin of error in each prediction for the sales price. The majority of errors were off by no more than +-$50,000. There are notable patches that have greater errors, especially in the northeast and Northwest where wealthier homes are, emphasizing the evident underestimate of high value homes.
+
+```{r Resdiuals Map of Test Set, message=FALSE}
+
+Philly.test <- Philly.test %>% 
+  mutate(spErrorClass = cut(sale_price.Error, breaks = c(min(Philly.test$sale_price.Error, na.rm=TRUE)-1, -100000, -50000, 50000, 100000, max(Philly.test$sale_price.Error, na.rm=TRUE))))
+
+ggplot()+
+    geom_sf(data=planning_districts,fill='grey80',color='transparent')+
+    geom_sf(data=Philly.test, size=0.5,aes(colour = spErrorClass))+
+    geom_sf(data=planning_districts,fill='transparent',color='black')+
+    scale_color_manual(values = c('#7b3294','#c2a5cf','#f7f7f7','#a6dba0','#008837'),
+                    name = "Sale Price Error Margins",
+                    na.value = 'grey80',
+                    labels = c('Less than -100,000$', '-100,000$ to -50,001$', '-50,000$ to 50,000$', '50,001$ - 100,000$','More than 100,000$'))+
+  mapTheme()
+
+```
+  
+## Spatial Lag Analysis
+
+Based on the map of the residuals above, we can observe there is some spatial clustering in the residuals as points with similar errors are clustered near each-other. We can examine this pattern more closely by check if this similarity between our predicted values and predicated values of surrounding homes. To check this, we use a spatial lag calculation - spatial lag calculates the average of the neighboring values. 
+
+The scatter plot below compares the sales price error for each home in our model to the spatial lag error for sales price - our spatial lag error is calculated based on the average error of the five nearest homes. The points in the scatter plot are clustered, this indicates that our model generally predicts similar error for a home and the homes which surround it. However, there are exceptions to this trend as some homes have very small price errors but very large lag price errors. The blue line shows a regression line between the sales prices error and the lag price error.
+
+
+```{r Spatial Lag, message=FALSE}
+coords.test <-  st_coordinates(Philly.test) 
+
+neighborList.test <- knn2nb(knearneigh(coords.test, 5))
+
+spatialWeights.test <- nb2listw(neighborList.test, style="W")
+ 
+Philly.test %>% 
+  mutate(lagPriceError = lag.listw(spatialWeights.test, sale_price.Error)) %>%
+  ggplot()+
+  geom_point(aes(x =lagPriceError, y =sale_price.Error))+
+  stat_smooth(aes(lagPriceError, sale_price.Error), 
+             method = "lm", se = FALSE, size = 0.5, colour="blue")+
+  xlim(-1000000,500000)+
+  ylim(-1000000,500000)+
+  plotTheme()
+```
+
+## Morans I Check for Spatial Clustering in Errors
+
+Moran's I is a measurement in statistics that evaluates the tendency for data points with similar values to occur near one another. Using Moran's I allows us to statistically prove that houses spatially close to each other have similar sales price errors. The Moran's I value ranges from -1 to 1. The closer the Moran's I value is to one the higher the amount of clustering present in the dataset.
+
+The Moran's I value for our sales price errors is positive indicating that for our price errors are clustered. We can run a statistical test to check if this clustering is real clustering or the result of random chance. This statistical test involves taking all the errors generated by our model and randomly spreading them on a map 999 times and calculating the Moran's I value for each time.
+
+In the histogram below, the thin bell shaped distribution represents the Moran's I values of our random statistical test. The Moran's I values for the 999 random spread of errors is generally near zero. The Moran's I value of our errors in sales prices is roughly 0.2, this is well above the bell shaped distribution of the random tests. Thus, we can say with high confidence that spatial clustering is present in our sales price errors. 
+
+```{r MoransI, message=FALSE}
+
+moranTest <- moran.mc(Philly.test$sale_price.Error, 
+                      spatialWeights.test, nsim = 999)
+
+ggplot(as.data.frame(moranTest$res[c(1:999)]), aes(moranTest$res[c(1:999)])) +
+  geom_histogram(binwidth = 0.01) +
+  geom_vline(aes(xintercept = moranTest$statistic), colour = "orange",size=1) +
+  scale_x_continuous(limits = c(-1, 1)) +
+  labs(title="Observed and permuted Moran's I",
+       subtitle= "Observed Moran's I in orange",
+       x="Moran's I",
+       y="Count") +
+  plotTheme()
+```
+
+# Sales Price Predications
+
+We needed to compare how our modelling data against the "challenge" dataset, the specific houses we needed to predict. The modelling map shows the houses we used to teach the model how to predict different sales prices, even if it has a pre-existing sales price. The model then starts to predict values from the modelling data, and the results are shown below. For the "challenge" dataset, the model did not have any sales price to reference, and now we see the resulting predicted sales price for such. 
+
+Comparing the maps to each other, the challenge houses reflects the modelling sets through what would otherwise be the entire neighborhood. This parallel between the two maps prove that the challenge set is consistent with the predicted house prices used in the model and therefore can reasonably predict home values without the need of any previous sale price. 
+
+```{r sales_price_map}
+
+HDFinal_alldata <- HDFinal_alldata %>% 
+  mutate(sale_price.Predict = predict(reg.training, HDFinal_alldata),
+         sale_price.Predict = ifelse(sale_price.Predict <= 0, 10100, sale_price.Predict))
+
+breaks <- qBr(HDFinal_alldata,"sale_price.Predict")
+breaks1 <- as.character(as.numeric(breaks) -1)
+breaks2 = c(breaks1[2],breaks1[3],breaks1[4],breaks[5],round(max(HDFinal_alldata$sale_price.Predict),2))
+breaks3 <- paste0(breaks,' - ', breaks2)
+
+ ggplot()+
+   geom_sf(data=planning_districts,fill='grey80',color='transparent')+
+   geom_sf(data=HDFinal_alldata, size = 0.5, aes(color= q5(sale_price.Predict)))+
+   facet_wrap(~toPredict)+
+   scale_color_manual(values=palette5,
+                      labels=breaks3,
+                      name="Projected Home Sales Price (USD)\nQuintile Breaks") +
+ mapTheme()
+```
+
+# Spatial Pattern of Errors by Neighborhood
+
+We examine the average error by neigboorhood to determine is this error is similar in all neighboorhood or varies by neighboorhood. Planning districts are used as a proxy for neighboorhoods in Philadelphia. 
+
+## Map
+ 
+This map shows the Mean Average Percentage Error by planning district. A notable observation from the map is that the models largest errors are in the lower income suburban sections of the city, specifically areas North of Center City and part of West Philadelphia. We can conclude the model is less accurate in less desirable neighborhoods where sales prices are generally lower.
+
+```{r map_neighboorhoods, warning=FALSE, message=FALSE}
+st_drop_geometry(Philly.test) %>%
+  group_by(Regression, DIST_NAME) %>%
+  summarize(mean.MAPE = mean(abs(sale_price.APE * 100), na.rm = T)) %>%
+  ungroup() %>% 
+  left_join(planning_districts) %>%
+    st_sf() %>%
+    ggplot() + 
+      geom_sf(aes(fill = mean.MAPE)) +
+      scale_fill_gradient(low = palette5[1], high = palette5[5],
+                          name = "Mean Absolute Percent Error") +
+      labs(title = "Mean test set MAPE by neighborhood") +
+      mapTheme()
+
+```
+
+## Scatterplot plot of MAPE by neighborhood as a function of mean sales price
+
+The scatter plot below shows the relationship between the average sales price for a neighborhood and the average MAPE for the neighborhood. We can again observe that neighborhoods with a lower sales price tend to have a larger mean absolute percentage error. 
+
+```{r MAPE Scatter Plot,warning=FALSE, message=FALSE}
+
+st_drop_geometry(Philly.test) %>%
+  group_by(Regression, DIST_NAME) %>%
+  summarize(mean.MAPE = abs(mean(sale_price.APE, na.rm = T)), 
+            mean.sale_price = mean(sale_price, na.rm = T)) %>%
+  ungroup() %>% 
+  left_join(planning_districts) %>% 
+  ggplot() +
+  geom_point(aes(x =mean.sale_price, y =mean.MAPE, color=DIST_NAME))+
+  stat_smooth(aes(mean.sale_price, mean.MAPE), 
+             method = "lm", se = FALSE, size = .5, colour="red")+
+  scale_y_continuous(labels = scales::percent)+
+  plotTheme()
+
+```
+
+# Spatial Pattern of Errors by Income and Race Pattern
+
+We also check our model to see see if its performance is different in High and Low Income areas and Majority White and Majority Non White Areas.
+
+## Map of Income and Racial Contexts
+
+We divide the census tracts of Philadelphia into High and Low Income areas. High income areas refers to all census tracts where the median income level is above the median income for Philadelphia. Low income areas refer to all census tracts where the median income level is below the median.
+
+We also divide the census tracts of Philadelphia into Majority White and Majority Non-White areas. Majority white areas include all census tracts where the white home owner rate is above 50%, majority non-white areas include all census tracts where the white home owner rate is below 50%. 
+
+The maps below show the Majority White and Majority Non-White Areas and the High and Low Income areas using our established definitions.
+
+```{r Income and Race, fig.width=10, warning=FALSE, message=FALSE}
+acsTractsPHL.2021 <- acsTractsPHL.2021 %>%
+ mutate(raceContext = ifelse(WhiteHOrate > .5, "Majority White", "Majority Non-White"),
+         incomeContext = ifelse(medHHInc > 52650, "High Income", "Low Income"))
+
+
+grid.arrange(ncol = 2,
+  ggplot() + 
+    geom_sf(data=planning_districts,fill='beige',color='transparent')+
+    geom_sf(data = acsTractsPHL.2021, aes(fill = raceContext)) +
+    scale_fill_manual(values=c('black','white'))+
+    labs(title = "Race Context") +
+    mapTheme() + theme(legend.position="bottom"), 
+  ggplot() + 
+    geom_sf(data=planning_districts,fill='beige',color='transparent')+
+    geom_sf(data = acsTractsPHL.2021, aes(fill = incomeContext))+
+    scale_fill_manual(values=c('green','black'))+
+    labs(title = "Income Context") +
+    mapTheme() + theme(legend.position="bottom"))
+
+```
+
+## Comparison of MAPE by Race and Income context
+
+The table below presents the Mean Absolute Percent Error by race and income context. The highest Mean Absolute Percent Error occurs in majority non-white low income areas. Thus, we can concluded our model performs worse in non-white, low income areas. Our model performs best in high income majority white areas.
+
+```{r sumarrize_race_income, warning=FALSE, message=FALSE}
+
+st_join(Philly.test, acsTractsPHL.2021) %>% 
+  filter(!is.na(incomeContext)) %>%
+  group_by(raceContext, incomeContext) %>%
+  summarize(mean.MAPE = scales::percent(mean(sale_price.APE, na.rm = T))) %>%
+  st_drop_geometry() %>%
+  spread(incomeContext, mean.MAPE) %>%
+  kbl() %>%
+  kable_classic()
+
+```
+
+
+# Accuracy and Generalizability
+
+Our model accuracy is mixed. We have high accuracy in some cases and very poor accuracy in other instances. Our model does a poor job predicting home sales values for homes with very high sales prices - it tends to under predict the price of these homes. This could be in part due to the small sample size for homes with very high price values. Having additional training data for homes with very high sales prices could improve the accuracy of the model. 
+
+Our model also does a poor job predicting prices for low income home sales, even sometimes predicting negative home sales price values for low income houses. This error is leading to our models poor predictions in majority black neighborhoods. The poor performance in different race and income context indicates that our model is not generalizable and additional work is needed to develop a model which is generalizing across different income and race contexts.
+
+Additionally, the model is not generalizable to areas outside of Philadelphia. The independent variables selected for the model were selected because they catered to the Philadelphia region. It is likely that the relationship between the selected independent variables and sales prices would be different in another geography, and greater context for said areas is necessary for accuracy. 
+
+
+# Conclusion 
+
+Overall we do not recommend the model because of the racial bias it includes which can create disadvantages to marginalized communities. While the model does perform well in some areas, it is crucial to consider the ethical implications of its use. Because of the racial profiling, it is assigning risk to people, and focuses heavily on the homeowner's characteristics rather than the home itself. This process directly leads to discrimination, especially because the model is learning socioeconomic results based on historical discriminatory policy. If your sole priority is to learn what the next sale price is, this model can accomplish this task. However, the model user should note that some of the model errors could be substantial especially for expensive homes and majority non-white areas. If one does not want to perpetuate existing inequalities and ethically focus on a righteous model which has similar performance regardless of race and income, we must seek alternative solutions. 
