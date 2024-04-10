@@ -1,0 +1,231 @@
+---
+title: "CPLN 675: Homework 3"
+author: "Mimi Tran & Javier Fernandez"
+date: "April 3, 2024"
+  output:
+    html_document:
+      toc: true
+      toc_float: true
+      code_folding: hide
+      code_download: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+Climate change impacts such as sea level rise and more severe and frequent weather events like heavy rains exacerbate present flood threats. Identifying flood vulnerable areas and predicting where flooding may occur is integral to planning for a climate-changed future. The following report is a part of an effort to develop and test a predictive flood model: 
+
+We have been tasked with creating a model that predicts areas vulnerable to flooding. In order to do so, we chose an area where we already had recorded flood data: Calgary, Alberta (CAN). In addition, we needed to choose a comparable city to Calgary, one that could test our model. We chose Washington DC. Both Calgary and DC have large rivers running through the cities and are large population centers. 
+
+After choosing our cities, we came up with potential factors that might lead to flooding. Those factors are: 
+
+- Elevation
+- Impervious Surfaces
+- Parks
+- Low Permeable Soils (e.g. clay)
+- Waterbodies
+
+For each factor, we came up with a hypothesis: 
+
+- Elevation: If an area has low elevation, it will most likely flood.
+
+- Impervious Surfaces: If an area has or is made up of many impervious surfaces, it will most likely flood. 
+
+- Parks: If an area has or is made up of many green spaces, it will most likely not flood. 
+
+- Low Permeable Soils: If an area has or is made up of many low permeable soils, it will most likely flood.
+
+- Waterbodies: If an area has or is made up of existing waterbodies, it will most likely flood. 
+
+In order to test these hypotheses and build a predictive model, we conducted feature engineering, spatial lags, and a generalized linear model (GLM). The following sections highlight key features, our regression model summary, and  outline our approach and methods, beginning with creating a training and our final flood predictions for Calgary and DC. 
+
+Ultimately, the DC predictive model did not perform how we would have hoped; however, we found promising results in our Calgary model. This draws us to conclude that Washington DC may not have been a good fit as a comparison city. For example, while Calgary is far more inland and has a drier climate, DC is relatively close to the Chesapeake Bay and tends to be more humid. Other US cities that might have been more comparable to Calgary could have been Denver, CO, or Salt Lake City, UT. 
+
+# Maps of Variables
+
+To begin our modeling process in R, we uploaded our Calgary fishnet and our predictive factors or "variables": elevation, impervious surfaces, low permeable soils, parks, and waterbodies. A fishnet is a grid made up of squares--like a net--called "cells" overlaid on some geographic area. Fishnets have many uses, but our main purpose was to use the fishnet for spatial analysis and modeling.
+
+The fishnet allows us to measure the presence or "how much" of a variable is found within a certain area or cell. By running zonal statistics for each variable in ArcGIS, we determined what was the best measure for each variable:
+
+- Elevation: We decided to measure the lowest point of each cell, or the minimum value of elevation. We operated under the assumption that the lowest point of every cell is where most water within the cell will gather. 
+
+- Impervious Surfaces: If the mean count of "impervious surface" pixels withi na cell was equal to or exceeded 25% of a cell, then the cell possessed impervious surfaces. 
+
+- Low Permeable Soils: If the mean count of "low permeable soil" pixels within a cell was equal to or exceeded 25% of a cell, then the cell possessed low permeable soils.  
+
+- Parks: If the mean count of "park" pixels of within a cell was equal to or exceeded 25%, then the cell possessed a park. 
+
+- Waterbodies: If the mean count of "waterbodies" pixels of within a cell was equal to or exceeded 25%, then the cell possessed a waterbody.
+
+Four of these maps are visualized below:
+
+## Impervious Surfaces
+```{r}
+  ggplot() +
+  geom_sf(data = joined_fishcal, aes(fill = Impervious_majority)) + 
+  scale_fill_gradient(low = "lightgrey", high = "red") + # color
+  labs(fill = "Impervious Surface Present", title = "Impervious Surface")
+  theme_minimal()
+```
+## Parks
+```{r}
+ggplot() +
+  geom_sf(data = joined_fishcal, aes(fill = Parks_Majority)) +
+  scale_fill_gradient(low = "lightgrey", high = "darkgreen") +
+  labs(fill = "Parks Present", title = "Parks") +
+  theme_minimal()
+```
+## Low Permeable Soils
+```{r}
+ggplot() +
+  geom_sf(data = joined_fishcal, aes(fill = Low_permeability)) +  
+  scale_fill_gradient(low = "lightgrey", high = "orange") + 
+  labs(fill = "Low Permeability Soils Present", title = "Low Permeability Soils") + 
+  theme_minimal()
+```
+
+## Existing Waterbodies
+```{r}
+ggplot() +
+  geom_sf(data = joined_fishcal, aes(fill = Water_majority)) + 
+  scale_fill_gradient(low = "lightgrey", high = "darkblue") + 
+  labs(fill = "Waterbody Present", title = "Waterbodies") + 
+  theme_minimal()
+```
+
+
+# Final Logistic Regression Model
+```{r}
+floodModel <- glm(Flooded ~ ., 
+                     family="binomial"(link="logit"), data = floodTrain %>%
+                       as.data.frame() %>%
+                       dplyr::select(-geometry, -cell))
+summary(floodModel)
+```
+
+Our regression summary shows that our variables are statistically significant, meaning there is some relationship between flooding and the presence of our. variables. 
+
+```{r}
+# Confusion matrix
+testProbs$predClass  = ifelse(testProbs$pred > .25 ,1,0)
+
+caret::confusionMatrix(reference = as.factor(testProbs$obs), 
+                       data = as.factor(testProbs$predClass), 
+                       positive = "1")
+
+# ROC Curves for the testing dataset
+ggplot(testProbs, aes(d = obs, m = pred)) + 
+  geom_roc(n.cuts = 50, labels = FALSE) + 
+  style_roc(theme = theme_grey) +
+  geom_abline(slope = 1, intercept = 0, size = 1.5, color = 'grey')
+
+auc(testProbs$obs, testProbs$pred)
+```
+
+We originally ran our confusion matrix with a 50% probability level; however, after observing that our model was more accurate given a 25% probability level, we changed the level or "threshold" we wished for the model to consider a cell "flooded" to 25%. 
+
+According to the Confusion Matrix, our model runs at about an 82% accuracy rate and is best at predicting which cells are not flooded, but is less accurate at predicting which cells will flood. 
+
+For example, the Confusion Matrix shows that our model predicted 903 cells would not flood. Out of those 903 cells, 766 cells were predicted to not flood and actually did not flood based off of the real Calgary flood data; however, 137 of the cells predicted to not flood, actually did flood. On the other hand, out of 167 cells, our model correctly predicted 111 cells would flood, but incorrectly predicted 56 cells would flood and in actuality, these cells did not flood. 
+
+This information is summed up in the sensitivity and specificity measure of our model. The Confusion Matrix shows that our model's sensitivity, that is, its accuracy in predicting cells that **will** flood is about 67%; our model's specificity, that is, its accuracy in predicting cells that **will not** flood is about 85%. 
+
+Our ROC curve visualizes a general diagnostic of our model's performance. Based on our probability curve and confusion metrics, we decided that a threshold of 25% is the best probability level for our model to predict cells as flooded or not flooded.
+
+## Cross Validation
+
+```{r}
+#Cross Validation
+ctrl <- trainControl(method = "cv", 
+                     number = 100, 
+                     p = 0.7, 
+                     savePredictions = TRUE)
+
+cvFit <- train(as.factor(Flooded) ~ .,  data = ca_inundation %>% 
+                 as.data.frame() %>%
+                 dplyr::select(-geometry, -cell), 
+               method="glm", family="binomial",
+               trControl = ctrl)
+
+cvFit
+
+ggplot(as.data.frame(cvFit$resample), aes(Accuracy)) + 
+  geom_histogram() +
+  scale_x_continuous(limits = c(0, 1)) +
+  labs(x="Accuracy",
+       y="Count")+
+  plotTheme
+```
+
+# Prediction Maps
+## Confusion Metrics for Training Set
+```{r}
+ca_inundation %>%
+  mutate(confResult=case_when(allPredictions < 25 & Flooded==0 ~ "True_Negative",
+                              allPredictions >= 25 & Flooded==1 ~ "True_Positive",
+                              allPredictions < 25 & Flooded==1 ~ "False_Negative",
+                              allPredictions >= 25 & Flooded==0 ~ "False_Positive")) %>%
+  ggplot()+
+  geom_sf(aes(fill = confResult), color = "transparent")+
+  scale_fill_manual(values = c("Red","Orange","Light Blue","Light Green"),
+                    name="Outcomes")+
+  labs(title="Confusion Metrics") +
+  mapTheme
+```
+
+## Calgary Predictions
+
+```{r}
+#Map Predictions
+allPredictions <- 
+  predict(cvFit, ca_inundation, type="prob")[,2]
+
+ca_inundation <- 
+  cbind(ca_inundation,allPredictions) %>%
+  mutate(allPredictions = round(allPredictions * 100))
+
+ggplot() + 
+  geom_sf(data=ca_inundation, aes(fill=factor(ntile(allPredictions,5))), 
+          colour=NA) +
+  scale_fill_manual(values = c("#edf8fb","#b3cde3","#8c96c6","#8856a7","#810f7c"),
+                    labels=as.character(quantile(ca_inundation$allPredictions,
+                                                 c(0.1,.2,.4,.6,.8),
+                                                 na.rm=T)),
+                    name="Predicted\nProbabilities(%)\n(Quintile\nBreaks)") +
+  mapTheme +
+  labs(title="")
+
+ggplot() + 
+  geom_sf(data=ca_inundation, aes(fill=factor(ntile(allPredictions,5))), colour=NA) +
+  scale_fill_manual(values = c("#edf8fb","#b3cde3","#8c96c6","#8856a7","#810f7c"),
+                    labels=as.character(quantile(ca_inundation$allPredictions,
+                                                 c(0.1,.2,.4,.6,.8),
+                                                 na.rm=T)),
+                    name="Predicted\nProbabilities(%)\n(Quintile\nBreaks)") +
+  geom_sf(data=ca_inundation  %>% 
+            filter(Flooded == 1), 
+          fill="blue",colour=NA) +
+  
+  mapTheme +
+  labs(title="Observed and Predicted Flooded Areas in Calgary",
+       subtitle="Observed flooded land in blue")
+```
+
+## DC Predictions
+
+```{r}
+ggplot() + 
+  geom_sf(data=dc_inundation$geometry, aes(fill=factor(ntile(dc_allPredictions,5))), colour=NA) +
+  scale_fill_manual(values = c("#edf8fb","#b3cde3","#8c96c6","#8856a7","#810f7c"),
+                    labels=as.character(quantile(dc_inundation$dc_allPredictions,
+                                                 c(0.1,.2,.4,.6,.8),
+                                                 na.rm=T)),
+                    name="Predicted\nProbabilities(%)\n(Quintile\nBreaks)") +
+  mapTheme +
+  labs(title="Predicted Flooded Areas in DC")
+
+```
+
